@@ -30,6 +30,3 @@ apply_ start (x:y:xs) i
 
 apply [] i = i
 apply (x:xs) i = apply_ x (x:xs) i
-
-m :: [int] -> [int] -> [int]
-m 

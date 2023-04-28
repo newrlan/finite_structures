@@ -204,7 +204,8 @@ class RubikSmallGroup:
             perm *= self.colors[w]
         return perm
 
-    def word_for_pair(self, left: Swap, right: Swap) -> str:
+    def word_eliminating_pair(self, left: Swap, right: Swap) -> str:
+        """ Вернуть слово обратное к перестановке из двух свопов. """
 
         s1 = set(left)
         s2 = set(right)
@@ -219,14 +220,11 @@ class RubikSmallGroup:
 
         # Движения к состоянию применяются справа на лево, поэтому сперва идет
         # правое слово, потом левое.
-        word = self.helpers[right][pair] + self.helpers[left][pair]
+        right_ = tuple(sorted(right))
+        left_ = tuple(sorted(left))
+        word = self.helpers[right_][pair] + self.helpers[left_][pair]
         return word_simplify_4_deg(word)
 
-        
-
-
-
-        
 
 
 if __name__ == '__main__':
