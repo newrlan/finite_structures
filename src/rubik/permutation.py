@@ -191,6 +191,7 @@ def rubik_double_swaps() -> dict[Swap, dict[Swap, str]]:
 
     return mat
 
+
 class RubikSmallGroup:
     def __init__(self):
         self.colors = {'O': O, 'B': B, 'Y': Y, 'W': W, 'G': G, 'R': R}
@@ -224,6 +225,9 @@ class RubikSmallGroup:
         left_ = tuple(sorted(left))
         word = self.helpers[right_][pair] + self.helpers[left_][pair]
         return word_simplify_4_deg(word)
+
+    def eliminating_word(self) -> str:
+        pass
 
 
 

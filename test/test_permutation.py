@@ -1,4 +1,4 @@
-from permutation import Permutation, RubikSmallGroup
+from rubik.permutation import Permutation, RubikSmallGroup
 import pytest
 
 
