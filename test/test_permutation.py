@@ -50,6 +50,37 @@ def test_RubikSmallGroup_word_eliminating_pair(swap1, swap2):
 
     p = Permutation().apply_cycle(swap1).apply_cycle(swap2)
     word = rsg.word_eliminating_pair(swap1, swap2)
-    q = rsg.apply_word(word)
+    q = rsg.word2permutation(word)
+    assert (p * q).len() == 0
+    assert (q * p).len() == 0
+
+
+permutations = [
+    Permutation()\
+        .apply_cycle((1, 2))\
+        .apply_cycle((1, 3))\
+        .apply_cycle((2, 3))\
+        .apply_cycle((3, 4)),
+    Permutation()\
+        .apply_cycle((1, 2))\
+        .apply_cycle((1, 3))\
+        .apply_cycle((2, 3)),
+    Permutation()\
+        .apply_cycle((1, 2))\
+        .apply_cycle((3, 4)),
+]
+
+
+@pytest.mark.parametrize('p', permutations)
+def test_RubikSmallGroup_permutation2word(p):
+    # p = Permutation()\
+    #     .apply_cycle((1, 2))\
+    #     .apply_cycle((1, 3))\
+    #     .apply_cycle((2, 3))\
+    #     # .apply_cycle((3, 4))
+
+    rsg = RubikSmallGroup()
+    word = rsg.permutation2word(p)
+    q = rsg.word2permutation(word)
     assert (p * q).len() == 0
     assert (q * p).len() == 0

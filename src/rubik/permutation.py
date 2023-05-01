@@ -197,7 +197,7 @@ class RubikSmallGroup:
         self.colors = {'O': O, 'B': B, 'Y': Y, 'W': W, 'G': G, 'R': R}
         self.helpers = rubik_double_swaps()
 
-    def apply_word(self, word: str):
+    def word2permutation(self, word: str) -> Permutation:
         perm = Permutation()
         for w in word:
             if w not in self.colors:
@@ -226,9 +226,24 @@ class RubikSmallGroup:
         word = self.helpers[right_][pair] + self.helpers[left_][pair]
         return word_simplify_4_deg(word)
 
-    def eliminating_word(self) -> str:
-        pass
+    def permutation2word(self, perm: Permutation) -> str:
+        res_word = ''
+        swaps_list = perm.swaps()
 
+        if len(swaps_list) % 2 != 0:
+            # perm нечетная перестановка. Домножаем ее на нечетную перестановку
+            # O, чтобы итог получился четным.
+            swaps_list = (perm * O * O * O).swaps()
+            res_word = 'O'
+
+        while len(swaps_list) > 0:
+            left = swaps_list[-2]
+            right = swaps_list[-1]
+            word = self.word_eliminating_pair(left, right)
+            res_word = word_simplify_4_deg(word + res_word)
+            swaps_list = swaps_list[:-2]
+
+        return res_word
 
 
 if __name__ == '__main__':

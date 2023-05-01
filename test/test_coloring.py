@@ -35,6 +35,3 @@ vectors_rotation_set = [
 def test_Vector_rotate(vector, axis, answer):
     w = vector.rotate(axis)
     assert w == answer
-    # assert w.x == answer.x
-    # assert w.y == answer.y
-    # assert w.z == answer.z
