@@ -233,14 +233,14 @@ class RubikSmallGroup:
         if len(swaps_list) % 2 != 0:
             # perm нечетная перестановка. Домножаем ее на нечетную перестановку
             # O, чтобы итог получился четным.
-            swaps_list = (perm * O * O * O).swaps()
+            swaps_list = (perm * O).swaps()
             res_word = 'O'
 
-        while len(swaps_list) > 0:
+        while len(swaps_list) > 1:
             left = swaps_list[-2]
             right = swaps_list[-1]
             word = self.word_eliminating_pair(left, right)
-            res_word = word_simplify_4_deg(word + res_word)
+            res_word = word_simplify_4_deg(res_word + word)
             swaps_list = swaps_list[:-2]
 
         return res_word

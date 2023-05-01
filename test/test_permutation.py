@@ -40,6 +40,8 @@ swaps = [
     ((1, 2), (2, 4)),
     ((1, 2), (4, 2)),
     ((1, 4), (1, 4)),
+    ((2, 4), (2, 3)),
+    ((2, 6), (2, 5)),
 ]
 
 
@@ -68,17 +70,14 @@ permutations = [
     Permutation()\
         .apply_cycle((1, 2))\
         .apply_cycle((3, 4)),
+    Permutation().apply_cycle([2, 6, 5, 4, 3]),
+    Permutation().apply_cycle([2, 6, 5, 4, 3]).apply_cycle((1, 8)),
+    Permutation()
 ]
 
 
 @pytest.mark.parametrize('p', permutations)
 def test_RubikSmallGroup_permutation2word(p):
-    # p = Permutation()\
-    #     .apply_cycle((1, 2))\
-    #     .apply_cycle((1, 3))\
-    #     .apply_cycle((2, 3))\
-    #     # .apply_cycle((3, 4))
-
     rsg = RubikSmallGroup()
     word = rsg.permutation2word(p)
     q = rsg.word2permutation(word)
