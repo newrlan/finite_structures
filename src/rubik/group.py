@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 
-from rubik.permutation import Permutation
+from rubik.permutation import Permutation, RubikSmallGroup
 from rubik.coloring import Vector, ColoringCell, Color, rotate, cell
 
 
@@ -55,28 +55,38 @@ class Rubik:
             col[cell_a] = cell_b
         self._coloring = col
 
-    def permutation(self, coloring: Optional[ColoringCell] = None) -> Permutation:
+    def permutation(
+        self,
+        coloring: Optional[ColoringCell] = None,
+        subgroup: Optional[str] = None
+    ) -> Permutation:
         """ Map coloring to permutation. """
 
         if coloring is None:
-            coloring = self._coloring
+            coloring = self.coloring
+
+        candidates = coloring.keys()
+        if subgroup == 'vertex':
+            candidates = [c for c in candidates if c.rank() == 3]
 
         perm = dict()
-        for a, b in coloring.items():
+        # for a, b in coloring.items():
+        for a in candidates:
+            b = coloring[a]
             if a == b:
                 continue
             i = self.cells_index[a]
             j = self.cells_index[b]
             perm[j] = i
 
-        # Permutation shows where color must be after action, but in
-        # self.coloring we have color of cell after action. As a result key of
-        # dictionary self.coloring is the destination of value.
-
         return Permutation(perm)
 
     def act(self, color: Color):
-        self.coloring = {v: rotate(w, color) for v, w in self._coloring.items()}
+        coloring = dict()
+        for v, c in self.coloring.items():
+            d = rotate(v, color)
+            coloring[d] = c
+        self.coloring = coloring
         return self
 
     def apply(self, word: str):
@@ -104,24 +114,34 @@ class Rubik:
         pass
 
 
-
 if __name__ == '__main__':
 
-    R = Rubik()
-    R.act(Color.R).act(Color.R).act(Color.R).act(Color.B).act(Color.R)
-    R.apply("RRRBR")
-    for c, v in R.coloring.items():
-        if c == v:
+    # cube = Rubik.load(Path('../../test/state_300423.txt'))
+    cube = Rubik.load(Path('state.txt'))
+    # cube = cube.act(Color.O)
+
+    p = cube.permutation(subgroup='vertex')
+    print('permutation:\t', p)
+    word = RubikSmallGroup().permutation2word(p)
+    print('word:\t', word)
+
+    # cube = cube.act(Color.B)
+
+    # p = cube.permutation(subgroup='vertex')
+    # print('permutation:\t', p)
+    # word = RubikSmallGroup().permutation2word(p)
+    # # word = 'OOOBOBBOOOBBBOBBBYYYBBYB' + 'OOOWOBBOOOWWWOBYOOYYYBBB'
+    # print('word:\t', word)
+
+    # q = RubikSmallGroup().word2permutation(word)
+    # print("p * q =", p * q)
+
+    cube.apply(word)
+    for v, w in cube.coloring.items():
+        if v == w or v.rank() != 3:
             continue
-        print(c, '->', v, '\t', R.cells_index[c], R.cells_index[v])
+        print(v, w)
 
-    from example_rubik_state import *
-    coloring = {Vector(*v): cell(s) for v, s in state_230430_0946.items()}
-    for a, b in coloring.items():
-        print(a, b)
-    R = Rubik(coloring)
-    p = R.permutation()
-    print(p)
-
-    from permutation import RubikSmallGroup
-    rsg = RubikSmallGroup()
+    for w in word:
+        print(w)
+        input("")
