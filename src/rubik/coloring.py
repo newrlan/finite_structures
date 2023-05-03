@@ -46,6 +46,7 @@ class Vector:
         yield self.z
 
     def is_axis(self) -> bool:
+        """ Проверить, что вектор является осью. """
         return abs(self.x) + abs(self.y) + abs(self.z) == 1
 
     def __hash__(self):
@@ -58,6 +59,7 @@ class Vector:
         return f"Vector {self.x} {self.y} {self.z}"
 
     def rank(self):
+        """ Ранг вектора (количество ненулевых координат). """
         return sum([x != 0 for x in self])
 
 
@@ -74,6 +76,7 @@ class Color(Enum):
 
 
 def rotate(vect: Vector, axis: Color) -> Vector:
+    """ Развернуть вектор относительно оси. """
     if sum([a * b for a, b in zip(axis.value, vect)]) != 1:
         return vect
 
@@ -88,6 +91,7 @@ def rotate(vect: Vector, axis: Color) -> Vector:
 
 
 def cell(line: str) -> Vector:
+    """ Перевести буквенную раскраску в вектор. """
     try:
         colors = [Color.__members__[w].value for w in line]
     except KeyError:

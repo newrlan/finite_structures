@@ -4,11 +4,13 @@ from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 
-from rubik.permutation import Permutation, RubikSmallGroup
+from rubik.permutation import Permutation
 from rubik.coloring import Vector, ColoringCell, Color, rotate, cell
 
 
 class Rubik:
+    """ Состояние кубика рубика. """
+
     def __init__(self, coloring: Optional[ColoringCell] = None):
         self.cells = [
             # This is solid ordering for convenient handle checking.
@@ -26,18 +28,18 @@ class Rubik:
             Vector(-1, 1, -1),
 
             # Большая подргуппа
-            Vector(1, 0, 1),
-            Vector(1, 1, 0),
-            Vector(1, 0, -1),
-            Vector(1, -1, 0),
+            Vector(1, 0, 1),    # 9
+            Vector(1, 1, 0),    # 10
+            Vector(1, 0, -1),   # 11
+            Vector(1, -1, 0),   # 12
 
-            Vector(-1, 0, 1),
-            Vector(-1, 1, 0),
-            Vector(-1, 0, -1),
+            Vector(-1, 0, 1),   # 13
+            Vector(-1, 1, 0),   # 14
+            Vector(-1, 0, -1),  # 15
             Vector(-1, -1, 0),
 
-            Vector(0, 1, 1),
-            Vector(0, 1, -1),
+            Vector(0, 1, 1),    # 17
+            Vector(0, 1, -1),   # 18
             Vector(0, -1, -1),
             Vector(0, -1, 1),
         ]
@@ -46,10 +48,12 @@ class Rubik:
 
     @property
     def coloring(self) -> ColoringCell:
+        """ Раскраска. """
         return self._coloring
 
     @coloring.setter
     def coloring(self, coloring: ColoringCell) -> None:
+        """ Раскраска. """
         col = {cell: cell for cell in self.cells}
         for cell_a, cell_b in coloring.items():
             col[cell_a] = cell_b
@@ -70,7 +74,6 @@ class Rubik:
             candidates = [c for c in candidates if c.rank() == 3]
 
         perm = dict()
-        # for a, b in coloring.items():
         for a in candidates:
             b = coloring[a]
             if a == b:
@@ -82,6 +85,7 @@ class Rubik:
         return Permutation(perm)
 
     def act(self, color: Color):
+        """ Применить элементарное действие на стейте. """
         coloring = dict()
         for v, c in self.coloring.items():
             d = rotate(v, color)
@@ -90,6 +94,8 @@ class Rubik:
         return self
 
     def apply(self, word: str):
+        """ Применить последовательность действий. Действия будут применяться
+        слева направо. """
         for w in word:
             color = Color.__members__.get(w)
             if color is None:
@@ -99,6 +105,7 @@ class Rubik:
 
     @classmethod
     def load(cls, path: Path) -> Rubik:
+        """ Загрузить состояние из файла. """
         coloring: ColoringCell = dict()
         with open(path, 'r') as f:
             for line in f:
@@ -112,36 +119,3 @@ class Rubik:
     def save(self, path: Path):
         # TODO
         pass
-
-
-if __name__ == '__main__':
-
-    # cube = Rubik.load(Path('../../test/state_300423.txt'))
-    cube = Rubik.load(Path('state.txt'))
-    # cube = cube.act(Color.O)
-
-    p = cube.permutation(subgroup='vertex')
-    print('permutation:\t', p)
-    word = RubikSmallGroup().permutation2word(p)
-    print('word:\t', word)
-
-    # cube = cube.act(Color.B)
-
-    # p = cube.permutation(subgroup='vertex')
-    # print('permutation:\t', p)
-    # word = RubikSmallGroup().permutation2word(p)
-    # # word = 'OOOBOBBOOOBBBOBBBYYYBBYB' + 'OOOWOBBOOOWWWOBYOOYYYBBB'
-    # print('word:\t', word)
-
-    # q = RubikSmallGroup().word2permutation(word)
-    # print("p * q =", p * q)
-
-    cube.apply(word)
-    for v, w in cube.coloring.items():
-        if v == w or v.rank() != 3:
-            continue
-        print(v, w)
-
-    for w in word:
-        print(w)
-        input("")

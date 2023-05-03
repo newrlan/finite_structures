@@ -2,9 +2,9 @@ import pytest
 from pathlib import Path
 import os
 
-from rubik.group import Rubik
+from rubik.state import Rubik
 from rubik.coloring import Vector
-from rubik.permutation import RubikSmallGroup
+from rubik.rubik_group import RubikSmallGroup
 
 
 def test_Rubik_read():
