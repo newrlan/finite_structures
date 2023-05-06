@@ -4,7 +4,7 @@ import os
 
 from rubik.state import Rubik
 from rubik.coloring import Vector
-from rubik.rubik_group import RubikSmallGroup
+from rubik.group import RubikSmallGroup
 
 
 def test_Rubik_read():

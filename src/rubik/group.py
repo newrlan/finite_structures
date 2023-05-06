@@ -1,9 +1,10 @@
 from typing import List, Optional, Tuple
 from copy import deepcopy
-from itertools import combinations
+from itertools import combinations, product
 from rubik.permutation import Permutation
 from rubik.state import Rubik
 from rubik.coloring import Color
+from tqdm import tqdm
 
 
 O = Rubik().act(Color.O).permutation(subgroup='vertex')
@@ -151,7 +152,6 @@ class RubikSmallGroup:
 
         return res_word
 
-
 if __name__ == '__main__':
 
     rdw = rubik_double_swaps()
@@ -172,15 +172,93 @@ if __name__ == '__main__':
 
     act = {'O': o, 'B': b, 'Y': y, 'R': r, 'W': w, 'G': g}
 
-    # for w1, a1 in act.items():
-    #     for w2, a2 in act.items():
-    #         for w3, a3 in act.items():
-    #                 word = w1 + w2 + w3
-    #                 s = a1 * a2 * a3
-    #                 print(word, s)#  s ** 3, '->', s ** 4, '->', s ** 7)
+    def word(ws: str) -> Permutation:
+        p = Permutation()
+        for w in ws:
+            w = w.upper()
+            p *= act[w]
+        return p
 
-    s = o * g * y
-    p = o * o * y * y
-    h = s * p / s
-    for k in range(1, 7 + 1):
-        print(k, h ** k)
+    # d_words = dict()
+    # for a, c in product(act, act):
+    #     ws = a + c
+    #     p = word(ws)
+    #     if p.deg() % 5 == 0:
+    #         print(ws, ':', p ** 3)
+    #         d_words[ws.lower()] = p
+
+    def dim(xs, n):
+        return product(*[xs for _ in range(n)])
+
+    # for arr in dim(act, 5):
+    #     ws = ''
+    #     p = Permutation()
+    #     for w in arr:
+    #         ws += w
+    #         p *= act[w]
+
+    #     print(ws, p)
+
+    def l2wp(arr: List[str]) -> (str, Permutation):
+        ws = ''
+        p = Permutation()
+        for w in arr:
+            ws += w
+            p *= act[w]
+        return ws, p
+
+    # d_7_dict = dict()
+    # d_5_dict = dict()
+    # for arr in dim(act, 5):
+    #     w, p = l2wp(arr)
+    #     if p.deg() % 7 == 0:
+    #         d_7_dict[w] = p
+    #     if p.deg() % 5 == 0:
+    #         d_5_dict[w] = p
+
+    # l_7 = len(d_7_dict)
+    # l_5 = len(d_5_dict)
+    # print(f'7: {l_7} and 5: {l_5}')
+
+    # for w1, w2 in product(d_7_dict, d_5_dict):
+    #     ws = w1 + w2
+    #     p = d_7_dict[w1] * d_5_dict[w2]
+    #     q = p * p
+    #     if q.deg() == 3 and len(q.cycles()) == 1:
+    #         print('->', ws, p)
+
+    #     ws = w2 + w1
+    #     p = d_5_dict[w2] * d_7_dict[w1]
+    #     q = p * p
+    #     if q.deg() == 3 and len(q.cycles()) == 1:
+    #         print('<-', ws, p)
+
+    un = set()
+    for arr in tqdm(dim(act, 12), total=6**12):
+        w, p = l2wp(arr)
+        q = p ** 1
+        if q.len() == 3:
+            print(w, q)
+            c = q.cycles()[0]
+            c.sort()
+            tup = tuple(c)
+            if tup[0] > 0:
+                un.add(tup)
+
+    # un = set()
+    # with open('actions_lib', 'r') as f:
+    #     for ws in f:
+    #         ws = ws.strip()
+    #         p = word(ws)
+    #         q = p ** 2
+    #         c = q.cycles()[0]
+    #         c.sort()
+    #         tup = tuple(c)
+    #         if tup[0] > 8:
+    #             un.add(tup)
+
+    # print("search unknow elem") 
+    # for t in combinations(range(9, 21), 3):
+    #     if t in un:
+    #         continue
+    #     print('unknown', t)

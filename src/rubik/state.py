@@ -29,19 +29,19 @@ class Rubik:
 
             # Большая подргуппа
             Vector(1, 0, 1),    # 9
-            Vector(1, 1, 0),    # 10
-            Vector(1, 0, -1),   # 11
-            Vector(1, -1, 0),   # 12
+            Vector(0, -1, 1),   # 10
+            Vector(-1, 0, 1),   # 11
+            Vector(0, 1, 1),    # 12
 
-            Vector(-1, 0, 1),   # 13
-            Vector(-1, 1, 0),   # 14
-            Vector(-1, 0, -1),  # 15
-            Vector(-1, -1, 0),
+            Vector(1, 1, 0),    # 13
+            Vector(1, -1, 0),   # 14
+            Vector(-1, -1, 0),  # 15
+            Vector(-1, 1, 0),   # 16
 
-            Vector(0, 1, 1),    # 17
-            Vector(0, 1, -1),   # 18
-            Vector(0, -1, -1),
-            Vector(0, -1, 1),
+            Vector(1, 0, -1),   # 17
+            Vector(0, -1, -1),  # 18
+            Vector(-1, 0, -1),  # 19
+            Vector(0, 1, -1),   # 20
         ]
         self.cells_index = {cell: i + 1 for i, cell in enumerate(self.cells)}
         self.coloring = dict() if coloring is None else coloring

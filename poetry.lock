@@ -2,7 +2,7 @@
 name = "colorama"
 version = "0.4.6"
 description = "Cross-platform colored terminal text."
-category = "dev"
+category = "main"
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*,>=2.7"
 
@@ -72,10 +72,27 @@ category = "dev"
 optional = false
 python-versions = ">=3.7"
 
+[[package]]
+name = "tqdm"
+version = "4.65.0"
+description = "Fast, Extensible Progress Meter"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+colorama = {version = "*", markers = "platform_system == \"Windows\""}
+
+[package.extras]
+dev = ["py-make (>=0.1.0)", "twine", "wheel"]
+notebook = ["ipywidgets (>=6)"]
+slack = ["slack-sdk"]
+telegram = ["requests"]
+
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "c600f48221b1a9a2e4bf2936aa4c79cc2b01cf45cf2b667cb04bc505d4573fa8"
+content-hash = "192b2ea180df724fce033d9f7ae618387e18f44b35c03111a005bd2b37bd16f2"
 
 [metadata.files]
 colorama = []
@@ -85,3 +102,4 @@ packaging = []
 pluggy = []
 pytest = []
 tomli = []
+tqdm = []

@@ -1,5 +1,5 @@
 from rubik.permutation import Permutation
-from rubik.rubik_group import RubikSmallGroup
+from rubik.group import RubikSmallGroup
 import pytest
 
 
