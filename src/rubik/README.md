@@ -1,7 +1,6 @@
 # Кубик Рубика
 
-![pics rubik_coloring_state pdf](pics/rubik_coloring_state.pdf)
-![pics rubik_coloring_state png](pics/rubik_coloring_state.png)
+![pics rubik_coloring_state png](../../pics/rubik_coloring_state.png)
 
 Во время вращений граней кубика его центральные клетки не двигаются, то есть переходят сами в себя. С помощью них мы будем кодировать все движения над кубиком и будем обозначать их буками:
 
