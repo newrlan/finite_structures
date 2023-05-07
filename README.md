@@ -1,5 +1,8 @@
 # Конечные группы и поля
 
+![pics rubik_coloring_state pdf](pics/rubik_coloring_state.pdf)
+![pics rubik_coloring_state png](pics/rubik_coloring_state.png)
+
 > Work in Progress
 
 Заметки по теории групп с решением задачи сбора кубика Рубика.
