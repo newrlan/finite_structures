@@ -1,4 +1,5 @@
-from rubik.words import total_words_volume, word, ACT
+from math import comb
+from rubik.words import total_words_volume, word, ACT, _combination_of_splits
 from rubik.state import Rubik
 import pytest
 
@@ -40,3 +41,15 @@ def test_total_words_volume(n, k, answer):
     total = total_words_volume(n, k)
     assert total == answer
     
+
+@pytest.mark.parametrize('n, k, answer', [
+    (7, 0, 0),
+    (7, 1, 6),
+    (7, 2, 1890),
+    (7, 3, 36120),
+    (7, 4, 126000),
+    (7, 5, 100800),
+])
+def test__combination_of_splits(n, k, answer):
+    hyp = _combination_of_splits(n, k)
+    assert answer == hyp * comb(6, k)

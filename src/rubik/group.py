@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple
+from typing import List, Tuple
 from copy import deepcopy
 from itertools import combinations, product
 from rubik.permutation import Permutation
@@ -7,22 +7,14 @@ from rubik.coloring import Color
 from tqdm import tqdm
 
 
-O = Rubik().act(Color.O).permutation(subgroup='vertex')
-B = Rubik().act(Color.B).permutation(subgroup='vertex')
-Y = Rubik().act(Color.Y).permutation(subgroup='vertex')
-W = Rubik().act(Color.W).permutation(subgroup='vertex')
-G = Rubik().act(Color.G).permutation(subgroup='vertex')
-R = Rubik().act(Color.R).permutation(subgroup='vertex')
 E = Permutation()
-
-VERTEX_GEN_PERMUTATION = {
-    'O': Rubik().act(Color.O).permutation(subgroup='vertex'),
-    'B': Rubik().act(Color.B).permutation(subgroup='vertex'),
-    'Y': Rubik().act(Color.Y).permutation(subgroup='vertex'),
-    'W': Rubik().act(Color.W).permutation(subgroup='vertex'),
-    'G': Rubik().act(Color.G).permutation(subgroup='vertex'),
-    'R': Rubik().act(Color.R).permutation(subgroup='vertex'),
-}
+VERTEX_GEN_PERMUTATION = dict()
+for col in Color:
+    key = col.name
+    cycle = Rubik().act(col).permutation().cycles()
+    cycle = [c for c in cycle if c[0] <= 8]
+    p = Permutation().apply_cycle(cycle[0])
+    VERTEX_GEN_PERMUTATION[key] = p
 
 
 Lexica = dict[str, Permutation]
@@ -151,6 +143,7 @@ class RubikSmallGroup:
             swaps_list = swaps_list[:-2]
 
         return res_word
+
 
 if __name__ == '__main__':
 
