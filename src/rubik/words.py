@@ -1,13 +1,15 @@
 from collections.abc import Set
 from itertools import product
-from typing import List, Optional
+from math import comb, factorial
+from typing import Generator, List, Optional, Tuple
 
 from tqdm import tqdm
 from rubik.permutation import Permutation
 from rubik.coloring import Color
 from rubik.state import Rubik
 
-VERTEX_GEN_PERMUTATION = {
+ACT = {
+    # Элементарные действия над кубиком рубика
     'O': Rubik().act(Color.O).permutation(),
     'B': Rubik().act(Color.B).permutation(),
     'Y': Rubik().act(Color.Y).permutation(),
@@ -16,33 +18,50 @@ VERTEX_GEN_PERMUTATION = {
     'R': Rubik().act(Color.R).permutation(),
 }
 
-ACT = {
-    ## # deg 3
-    ## 'O': VERTEX_GEN_PERMUTATION['O'] ** 3,
-    ## 'B': VERTEX_GEN_PERMUTATION['B'] ** 3,
-    ## 'Y': VERTEX_GEN_PERMUTATION['Y'] ** 3,
-    ## 'W': VERTEX_GEN_PERMUTATION['W'] ** 3,
-    ## 'G': VERTEX_GEN_PERMUTATION['G'] ** 3,
-    ## 'R': VERTEX_GEN_PERMUTATION['R'] ** 3,
-    # deg 1
-    'o': VERTEX_GEN_PERMUTATION['O'],
-    'b': VERTEX_GEN_PERMUTATION['B'],
-    'y': VERTEX_GEN_PERMUTATION['Y'],
-    'w': VERTEX_GEN_PERMUTATION['W'],
-    'g': VERTEX_GEN_PERMUTATION['G'],
-    'r': VERTEX_GEN_PERMUTATION['R'],
-}
-
 
 def word(ws: str) -> Permutation:
+    """ Конвертировать слово в перестановку. """
     p = Permutation()
     for w in ws:
-        p *= ACT[w]
+        p *= ACT[w.upper()]
     return p
 
 
 def dim(xs, n) -> List[str]:
+    """ Составить всевозможные комбинации из n элементов на основе множества
+    xs."""
+
     return [''.join(arr) for arr in product(*[xs for _ in range(n)])]
+
+
+def words_gen(n: int, k: int = 2) -> \
+        Generator[Tuple[str, Permutation], None, None]:
+    """ Генератор всевозможных слов длины n в которых участвует k и более
+    различных элементов. Возвращает пару (слово, перестановка). """
+
+    for arr in product(*[ACT for _ in range(n)]):
+        w = ''.join(arr)
+        if len(set(w)) < k:
+            continue
+        p = word(w)
+        yield (w, p)
+
+
+def total_words_volume(n: int, k: int) -> int:
+    """ Вычислить количество слов порождаемых генератором words_gen. """
+
+    if k > 6:
+        return 0
+
+    def P(n, s):
+        return comb(6, s) * (s ** (n - s))
+
+    return sum([P(n, s) for s in range(k, 6 + 1)])
+
+    # c = comb(6, k)      # места где расположить неповторящиеся элементы
+    # c *= factorial(k)   # комбинации перестановок неповторяющихся элементов
+    # c *= 6 ** (n - k)   # в оставшихся местах произвольные элементы
+    # return c
 
 
 def words_dim(n: int, k: int = 2) -> dict[str, Permutation]:
@@ -77,6 +96,12 @@ def brute_force_trivial_words(n: int, m: int = 2) -> List[str]:
                         res.append(w1 + w2)
                         res.append(w2 + w1)
                         print(w1, w2)
+
+                if w1 != w2 and p1 == p2:
+                    if len(set(w1 + w2)) > m:
+                        res.append(w1 + w2)
+                        res.append(w2 + w1)
+                        print(w1, '=', w2)
     else:
         wd_n = words_dim((n + 1) // 2, m)
         wd_k = words_dim(n // 2, m)
@@ -91,7 +116,24 @@ def brute_force_trivial_words(n: int, m: int = 2) -> List[str]:
                         res.append(w2 + w1)
                         print(w1, w2)
 
+                if p1 == p2:
+                    if len(set(w1 + w2)) > m:
+                        res.append(w1 + w2)
+                        res.append(w2 + w1)
+                        print(w1, '=', w2)
+
     return res
+
+
+def brutforce_compare(n, k, m=1):
+    wd_n = words_gen(n, m)
+    wd_k = words_gen(k, 1)
+    for w1, p1 in tqdm(wd_n, total=total_words_volume(n, m)):
+        for w2, p2 in wd_k:
+            if p1 == p2:
+                # if len(set(w1 + w2)) < m:
+                #     continue
+                print(w1, '=', w2)
 
 
 def instruction(ws: str):
@@ -103,14 +145,17 @@ def instruction(ws: str):
 
 if __name__ == '__main__':
 
-    # brute_force_trivial_words(12, 3)
-    w = 'oywgbrowygbr'
-    p = word(w)
-    print(p)
-    # instruction(w)
-    print(ACT['o'])
-    print(ACT['b'])
-    print(ACT['y'])
-    print(ACT['g'])
-    print(ACT['w'])
-    print(ACT['r'])
+    # for w, p in tqdm(words_gen(6, 3), total=total_words_volume(6, 3)):
+    #     if p.deg() % 3 == 0:
+    #         print(w, p)
+    # brute_force_trivial_words(9, 2)
+    # brutforce_compare(3, 2, 1)
+    # for w in tqdm(words_gen(8, 2), total=total):
+    #     continue
+    #     print(w)
+    kand = [
+     (7, 3),
+     ]
+    for n, k in kand:
+        m = len([1 for _ in tqdm(words_gen(n, k))])
+        print(n, k, m, '\n')

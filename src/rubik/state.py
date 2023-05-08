@@ -10,41 +10,43 @@ from rubik.coloring import Vector, ColoringCell, Color, rotate, cell
 
 class Rubik:
     """ Состояние кубика рубика. """
+    cells = [
+        # This is solid ordering for convenient handle checking.
+        # Малая подргуппа
+        # верхняя крышка
+        Vector(1, 1, 1),
+        Vector(1, -1, 1),
+        Vector(-1, -1, 1),
+        Vector(-1, 1, 1),
+
+        # нижняя крышка
+        Vector(1, 1, -1),
+        Vector(1, -1, -1),
+        Vector(-1, -1, -1),
+        Vector(-1, 1, -1),
+
+        # Большая подргуппа
+        Vector(1, 0, 1),    # 9
+        Vector(0, -1, 1),   # 10
+        Vector(-1, 0, 1),   # 11
+        Vector(0, 1, 1),    # 12
+
+        Vector(1, 1, 0),    # 13
+        Vector(1, -1, 0),   # 14
+        Vector(-1, -1, 0),  # 15
+        Vector(-1, 1, 0),   # 16
+
+        Vector(1, 0, -1),   # 17
+        Vector(0, -1, -1),  # 18
+        Vector(-1, 0, -1),  # 19
+        Vector(0, 1, -1),   # 20
+    ]
 
     def __init__(self, coloring: Optional[ColoringCell] = None):
-        self.cells = [
-            # This is solid ordering for convenient handle checking.
-            # Малая подргуппа
-            # верхняя крышка
-            Vector(1, 1, 1),
-            Vector(1, -1, 1),
-            Vector(-1, -1, 1),
-            Vector(-1, 1, 1),
-
-            # нижняя крышка
-            Vector(1, 1, -1),
-            Vector(1, -1, -1),
-            Vector(-1, -1, -1),
-            Vector(-1, 1, -1),
-
-            # Большая подргуппа
-            Vector(1, 0, 1),    # 9
-            Vector(0, -1, 1),   # 10
-            Vector(-1, 0, 1),   # 11
-            Vector(0, 1, 1),    # 12
-
-            Vector(1, 1, 0),    # 13
-            Vector(1, -1, 0),   # 14
-            Vector(-1, -1, 0),  # 15
-            Vector(-1, 1, 0),   # 16
-
-            Vector(1, 0, -1),   # 17
-            Vector(0, -1, -1),  # 18
-            Vector(-1, 0, -1),  # 19
-            Vector(0, 1, -1),   # 20
-        ]
         self.cells_index = {cell: i + 1 for i, cell in enumerate(self.cells)}
-        self.coloring = dict() if coloring is None else coloring
+        self._coloring = {cell: cell for cell in self.cells}
+        if coloring is not None:
+            self.coloring = coloring
 
     @property
     def coloring(self) -> ColoringCell:
@@ -54,28 +56,16 @@ class Rubik:
     @coloring.setter
     def coloring(self, coloring: ColoringCell) -> None:
         """ Раскраска. """
-        col = {cell: cell for cell in self.cells}
         for cell_a, cell_b in coloring.items():
-            col[cell_a] = cell_b
-        self._coloring = col
+            self._coloring[cell_a] = cell_b
 
     def permutation(
         self,
-        coloring: Optional[ColoringCell] = None,
-        subgroup: Optional[str] = None
     ) -> Permutation:
         """ Map coloring to permutation. """
 
-        if coloring is None:
-            coloring = self.coloring
-
-        candidates = coloring.keys()
-        if subgroup == 'vertex':
-            candidates = [c for c in candidates if c.rank() == 3]
-
         perm = dict()
-        for a in candidates:
-            b = coloring[a]
+        for a, b in self.coloring.items():
             if a == b:
                 continue
             i = self.cells_index[a]
@@ -84,7 +74,7 @@ class Rubik:
 
         return Permutation(perm)
 
-    def act(self, color: Color):
+    def act(self, color: Color) -> Rubik:
         """ Применить элементарное действие на стейте. """
         coloring = dict()
         for v, c in self.coloring.items():
@@ -97,9 +87,11 @@ class Rubik:
         """ Применить последовательность действий. Действия будут применяться
         слева направо. """
         for w in word:
+            if w == ' ':
+                continue
             color = Color.__members__.get(w)
             if color is None:
-                raise ValueError(f"Unknown color in word {word}.")
+                raise ValueError(f"Unknown color in the word {word}.")
 
             self.act(color)
 
@@ -113,8 +105,7 @@ class Rubik:
                 cell_a = Vector(int(x), int(y), int(z))
                 cell_b = cell(color)
                 coloring[cell_a] = cell_b
-        cls.coloring = coloring
-        return cls(coloring)
+        return Rubik(coloring)
 
     def save(self, path: Path):
         # TODO
