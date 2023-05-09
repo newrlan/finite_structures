@@ -1,6 +1,7 @@
-from collections.abc import Set
+from __future__ import annotations
 from itertools import combinations_with_replacement, product
 from math import comb, factorial
+from pathlib import Path
 from typing import Generator, List, Optional, Tuple
 
 from tqdm import tqdm
@@ -88,10 +89,89 @@ def instruction(ws: str):
     print('DONE!')
 
 
+class CycleLexica:
+    """ База соответствия циклов длины n и слов из которых этот цикл можно
+    получить."""
+
+    def __init__(self, dim: int):
+        self.dim = dim
+        self.vocab = dict()
+
+    def add(self, *sensorship: str):
+        """ Добавить новые циклы в базу. """
+        for w in sensorship:
+            p = word(w)
+            cycle = self.get_word_by_cycle(p)
+            self.vocab[cycle] = w
+
+    def get_word_by_cycle(self, p: Permutation) -> tuple:
+        """ Достать слово цикла из базы. """
+        cycles = p.cycles()
+        if len(cycles) > 1 or len(cycles[0]) != self.dim:
+            raise ValueError(f"Permuation {p} include more then 1 cycle.")
+        mc = min(cycles[0])
+        mi = [i for i, c in enumerate(cycles[0]) if c == mc][0]
+        return tuple(cycles[0][mi:] + cycles[0][:mi])
+
+    @classmethod
+    def load(cls, path: Path) -> CycleLexica:
+
+        ws = []
+        with open(path, 'r') as f:
+            for line in f:
+                line = line.strip()
+                ws.append(line)
+
+        if len(ws) == 0:
+            raise TypeError(f"File {path} doesn't have any line.")
+
+        dim = word(ws[0]).len()
+
+        cl = CycleLexica(dim)
+        cl.add(*ws)
+        return cl
+
+    def save(self, path: Path):
+        words_list = self.vocab.values()
+        with open(path, 'w') as f:
+            f.write('\n'.join(words_list))
+            
+
 if __name__ == '__main__':
 
-    num = 0
-    for _ in words_gen(3, 2):
-        num += 1
-    print(num)
-    print(total_words_volume(3, 2))
+    for w, p in tqdm(words_gen(5, 0), total=total_words_volume(5, 0)):
+
+        if p.len() == 0:
+            print(w, p)
+
+        # if p.deg() % 5 == 0:
+        #     print('5', w, p)
+        # if p.deg() % 7 == 0:
+        #     print('7', w, p)
+
+    wl = 'OOBOYOOBBB'[:5]
+    wr = 'OOBOYOOBBB'[5:]
+    print(wl, word(wl))
+    print(wr, word(wr))
+
+    for w1, p1 in tqdm(words_gen(5, 2), total=total_words_volume(5, 2)):
+        if p1.deg() % 7 != 0:
+            continue
+        for w2, p2 in words_gen(5, 2):
+            if p2.deg() % 5 != 0:
+                continue
+
+            p = p1 * p2
+            q = p ** 2
+            if q.len() != 3:
+                continue
+
+            print(w1, w2, q)
+
+            p = p2 * p1
+            q = p ** 2
+            if q.len() != 3:
+                continue
+
+            print(w2, w1, q)
+
