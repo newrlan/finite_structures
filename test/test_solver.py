@@ -1,6 +1,6 @@
 import pytest
 from rubik.permutation import Permutation
-from rubik.solver import separate_swaps, swaps_to_triplets
+from rubik.solver import permutation_triplets, separate_swaps, swaps_to_triplets
 from random import choice, randint
 
 from rubik.words import ACT
@@ -34,10 +34,28 @@ def test_separator(n_times, permutation):
 @pytest.mark.parametrize('n_times', range(5))
 def test_swaps_to_triplets(n_times, permutation):
     _, q = permutation
-    p = q ** 2  # гарантируем доставание перестановки четной в каждой подгруппе
+    p = q ** 2  # гарантируем генерацию перестановки четной в каждой подгруппе
 
     res = Permutation()
     for tr in swaps_to_triplets(p.swaps()):
         res = res.apply_cycle(tr)
 
     assert p == res
+
+
+@pytest.mark.parametrize('n_times', range(5))
+def test_permutation_triplets(n_times, permutation):
+    _, q = permutation
+    p = q ** 2  # гарантируем генерацию перестановки четной в каждой подгруппе
+
+    res = Permutation()
+    for tr in permutation_triplets(p):
+        res = res.apply_cycle(tr)
+
+    assert p == res
+
+
+@pytest.mark.parametrize('n_times', range(100))
+def test_even(n_times, permutation):
+    w, p = permutation
+    assert len(p.swaps()) % 2 == 0, f'Word {w} permutation {p}'
