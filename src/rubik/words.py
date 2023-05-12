@@ -122,13 +122,6 @@ class CycleLexica:
         with open(path, 'w') as f:
             f.write('\n'.join(words_list))
 
-    def permutation2word(p: Permutation) -> str:
-        pairs = p.swaps()
-        
-        def take_triplet(swap_list) -> Tuple[List[Swap], List[int]]:
-            pass
-            
-            
 
 if __name__ == '__main__':
 
