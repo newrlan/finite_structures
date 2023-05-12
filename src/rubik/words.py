@@ -28,12 +28,6 @@ def word(ws: str) -> Permutation:
     return p
 
 
-def dim(xs, n) -> List[str]:
-    """ Составить всевозможные комбинации из n элементов на основе множества
-    xs."""
-
-    return [''.join(arr) for arr in product(*[xs for _ in range(n)])]
-
 
 def _combination_of_splits(n: int, k: int) -> int:
     cum = 0
@@ -72,16 +66,6 @@ def total_words_volume(n: int, k: int) -> int:
     return total
 
 
-def words_dim(n: int, k: int = 2) -> dict[str, Permutation]:
-    res = dict()
-    for w in dim(ACT, n):
-        if len(set(w)) <= k:
-            continue
-        p = word(w)
-        res[w] = p
-    return res
-
-
 def instruction(ws: str):
     for w in ws:
         print(w)
@@ -115,6 +99,7 @@ class CycleLexica:
 
     @classmethod
     def load(cls, path: Path) -> CycleLexica:
+        """ Загрузить лексику из файла. """
 
         ws = []
         with open(path, 'r') as f:
@@ -132,27 +117,34 @@ class CycleLexica:
         return cl
 
     def save(self, path: Path):
+        """ Сохранить лексику в файл. """
         words_list = self.vocab.values()
         with open(path, 'w') as f:
             f.write('\n'.join(words_list))
+
+    def permutation2word(p: Permutation) -> str:
+        pairs = p.swaps()
+        
+        def take_triplet(swap_list) -> Tuple[List[Swap], List[int]]:
+            pass
+            
             
 
 if __name__ == '__main__':
 
-    for w, p in tqdm(words_gen(5, 0), total=total_words_volume(5, 0)):
+    # for w, p in tqdm(words_gen(5, 0), total=total_words_volume(5, 0)):
 
-        if p.len() == 0:
-            print(w, p)
+    #     if p.len() == 0:
+    #         print(w, p)
 
-        # if p.deg() % 5 == 0:
-        #     print('5', w, p)
-        # if p.deg() % 7 == 0:
-        #     print('7', w, p)
+    #     # if p.deg() % 5 == 0:
+    #     #     print('5', w, p)
+    #     # if p.deg() % 7 == 0:
+    #     #     print('7', w, p)
 
-    wl = 'OOBOYOOBBB'[:5]
-    wr = 'OOBOYOOBBB'[5:]
-    print(wl, word(wl))
-    print(wr, word(wr))
+    dim = 3
+    where_to_save = Path('lexica_3dim')
+    cl = CycleLexica(dim)
 
     for w1, p1 in tqdm(words_gen(5, 2), total=total_words_volume(5, 2)):
         if p1.deg() % 7 != 0:
@@ -163,15 +155,13 @@ if __name__ == '__main__':
 
             p = p1 * p2
             q = p ** 2
-            if q.len() != 3:
-                continue
 
-            print(w1, w2, q)
+            if q.len() == dim:
+                cl.add(w1 + w2 + w1 + w2)
 
             p = p2 * p1
             q = p ** 2
-            if q.len() != 3:
-                continue
+            if q.len() == dim:
+                cl.add(w2 + w1 + w2 + w1)
 
-            print(w2, w1, q)
-
+    cl.save(where_to_save)
