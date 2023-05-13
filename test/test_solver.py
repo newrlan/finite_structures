@@ -1,9 +1,9 @@
 import pytest
 from rubik.permutation import Permutation
-from rubik.solver import permutation_triplets, separate_swaps, swaps_to_triplets
+from rubik.solver import Puzzle, permutation_triplets, separate_swaps, swaps_to_triplets
 from random import choice, randint
 
-from rubik.words import ACT
+from rubik.words import ACT, word
 
 
 @pytest.fixture
@@ -59,3 +59,14 @@ def test_permutation_triplets(n_times, permutation):
 def test_even(n_times, permutation):
     w, p = permutation
     assert len(p.swaps()) % 2 == 0, f'Word {w} permutation {p}'
+
+
+@pytest.mark.parametrize('n_times', range(100))
+def test_Puzzle_word(n_times, permutation):
+    ws, p = permutation
+    rubik = Puzzle()
+    rubik.apply(ws)
+    new_ws = rubik.word()
+    q = word(new_ws)
+    assert p == q
+    # assert ws == rubik.word()

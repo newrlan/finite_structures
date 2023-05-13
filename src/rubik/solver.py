@@ -3,7 +3,8 @@ from typing import List, Optional, Tuple
 
 from rubik.permutation import Permutation
 from rubik.state import Rubik
-from rubik.words import ACT, CycleLexica
+from rubik.words import ACT, Cycle3Lexica
+# from rubik.words import ACT, Cycle3Lexica
 
 
 Swap = Tuple[int, int]
@@ -82,22 +83,26 @@ def permutation_triplets(p: Permutation) -> List[Triplet]:
     return v_triplets + e_triplets
 
 
-if __name__ == '__main__':
-    cl = CycleLexica.load(Path('lexica/lexica_3dim'))
-    rubik = Rubik.load(Path('src/rubik/state.txt'))
-    p = rubik.permutation()  #.apply_cycle((18, 20))
-    print('p', p)
-    if len(p.swaps()) % 4 != 0:
-        p = p * ACT['O']
-    tr_list = permutation_triplets(p)
-    print(tr_list)
-    for tr in tr_list:
-        q = Permutation().apply_cycle(tr)
-        i = cl.get_word_by_cycle(q)
-        print(cl.vocab[i])
+class Puzzle(Rubik):
 
-    # for tr, ws in cl.vocab.items():
-    #     if 9 in tr and 17 in tr and 15 in tr:
-    #         print(tr, '\t', ws)
+    def word(self, lexica: Optional[Cycle3Lexica] = None):
+        """ Показать слово которое кодирует перестановку на стейте кубика. """
+        # TODO: сделать путь чтения лексики универсальным
+        if lexica is None:
+            lexica = Cycle3Lexica.load(Path('lexica/3dim'))
 
-    # (9 15 17) (9 15 17) = (9 17 15)
+        p = self.permutation()
+        postfix = ''
+        if len(p.swaps()) % 4 != 0:
+            p = p * ACT['O']
+            postfix = 'OOO'
+
+        tr_list = permutation_triplets(p)
+        res = ''
+        for tr in tr_list:
+            ws = lexica.get(tr)
+            if ws is None:
+                raise ValueError(f"Triplet {tr} desn't exist in Lexica")
+            res += ws
+
+        return res + postfix

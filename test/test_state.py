@@ -1,3 +1,4 @@
+from random import choice, randint
 import pytest
 from pathlib import Path
 import os
@@ -5,6 +6,7 @@ from rubik.permutation import Permutation
 
 from rubik.state import Rubik
 from rubik.coloring import Vector, Color
+from rubik.words import ACT
 
 
 def test_Rubik_init():
@@ -41,6 +43,30 @@ def test_Rubik_act(color):
     p = cube.permutation()
     assert p.len() == 8
     assert p.deg() == 4
+
+
+@pytest.fixture
+def permutation():
+    p = Permutation()
+    w = ''
+    for _ in range(randint(2, 20)):
+        color = choice('OBYGWR')
+        p *= ACT[color]
+        w += color
+    return w, p
+
+
+@pytest.mark.parametrize('n_times', range(10))
+def test_Rubik_apply(n_times, permutation):
+    ws, p = permutation
+    cube = Rubik()
+    cube.apply(ws)
+    q = cube.permutation()
+    assert p == q
+
+
+# def test_Rubik_word():
+#     pass
 
 
 # def test_Rubik_apply_word():
