@@ -1,5 +1,6 @@
 from math import comb
-from rubik.words import total_words_volume, word, ACT, _combination_of_splits, CycleLexica
+from rubik.words import total_words_volume, word, ACT, _combination_of_splits
+from rubik.words import Cycle3Lexica
 from rubik.state import Rubik
 import pytest
 
@@ -55,13 +56,7 @@ def test__combination_of_splits(n, k, answer):
     assert answer == hyp * comb(6, k)
 
 
-def test_CycleLexica_add():
-
-    cl = CycleLexica(3)
-    cl.add('OOBOYOOBBBOOBOYOOBBB')
-
-
-def test_CycleLexica_save_load(tmp_path):
+def test_Cycle3Lexica_save_load(tmp_path):
     words_list = [
         'OOBOYOOBBBOOBOYOOBBB',
         'OOBBBOOBOYOOBBBOOBOY',
@@ -76,15 +71,25 @@ def test_CycleLexica_save_load(tmp_path):
         'OOBYWGBORGOOBYWGBORG',
     ]
     # Arrange
-    cl = CycleLexica(3)
+    cl = Cycle3Lexica()
     for w in words_list:
         cl.add(w)
 
     # Act
     f_name = tmp_path / 'lexica.txt'
     cl.save(f_name)
-    new_cl = CycleLexica.load(f_name)
+    new_cl = Cycle3Lexica.load(f_name)
 
     # Assert
-    assert new_cl.dim == 3
     assert len(new_cl.vocab) == 8
+
+
+@pytest.mark.parametrize('triplet, answer',
+    [((1, 2, 3), (1, 2, 3)),
+     ((8, 81, 2), (2, 8, 81)),
+     ((6, 4, 1), (1, 6, 4)),
+     ((20, 11, 30), (11, 30, 20))
+     ])
+def test_Cycle3Lexica__standart_triplet(triplet, answer):
+    s_tr = Cycle3Lexica()._standart_triplet(triplet)
+    assert s_tr == answer

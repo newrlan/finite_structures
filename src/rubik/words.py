@@ -1,5 +1,5 @@
 from __future__ import annotations
-from itertools import combinations_with_replacement, product
+from itertools import combinations, combinations_with_replacement, product
 from math import comb, factorial
 from pathlib import Path
 from typing import Generator, List, Optional, Tuple
@@ -73,32 +73,33 @@ def instruction(ws: str):
     print('DONE!')
 
 
-class CycleLexica:
-    """ База соответствия циклов длины n и слов из которых этот цикл можно
-    получить."""
+class Cycle3Lexica:
+    def __init__(self, path: Optional[Path] = None):
+        self.vocab: dict[Tuple[int, int, int], str] = dict()
+        if path is not None:
+            self = self.load(path)
 
-    def __init__(self, dim: int):
-        self.dim = dim
-        self.vocab = dict()
+    def add(self, *word_list: str):
+        for ws in word_list:
+            p = word(ws)
+            cycle = p.cycles()
+            assert len(cycle) == 1
+            assert len(cycle[0]) == 3
 
-    def add(self, *sensorship: str):
-        """ Добавить новые циклы в базу. """
-        for w in sensorship:
-            p = word(w)
-            cycle = self.get_word_by_cycle(p)
-            self.vocab[cycle] = w
+            triplet = self._standart_triplet(cycle[0])
+            self.vocab[triplet] = ws
 
-    def get_word_by_cycle(self, p: Permutation) -> tuple:
-        """ Достать слово цикла из базы. """
-        cycles = p.cycles()
-        if len(cycles) > 1 or len(cycles[0]) != self.dim:
-            raise ValueError(f"Permuation {p} include more then 1 cycle.")
-        mc = min(cycles[0])
-        mi = [i for i, c in enumerate(cycles[0]) if c == mc][0]
-        return tuple(cycles[0][mi:] + cycles[0][:mi])
+    @staticmethod
+    def _standart_triplet(tr: Tuple[int, int, int]) -> Tuple[int, int, int]:
+            a, b, c = tr
+            return min((a, b, c), (b, c, a), (c, a, b))
 
+    def get(self, tr: Tuple[int, int, int]) -> Optional[str]:
+        tr_ = self._standart_triplet(tr)
+        return self.vocab.get(tr_)
+        
     @classmethod
-    def load(cls, path: Path) -> CycleLexica:
+    def load(cls, path: Path) -> Cycle3Lexica:
         """ Загрузить лексику из файла. """
 
         ws = []
@@ -110,9 +111,7 @@ class CycleLexica:
         if len(ws) == 0:
             raise TypeError(f"File {path} doesn't have any line.")
 
-        dim = word(ws[0]).len()
-
-        cl = CycleLexica(dim)
+        cl = Cycle3Lexica()
         cl.add(*ws)
         return cl
 
@@ -122,39 +121,73 @@ class CycleLexica:
         with open(path, 'w') as f:
             f.write('\n'.join(words_list))
 
+    def bruteforse(self):
+        deg = 5
+        uniq_act = 2
+        gen = words_gen(deg, uniq_act)
+        deg_7_words = dict()
+        deg_5_words = dict()
+
+        for w, p in tqdm(gen, total=total_words_volume(deg, uniq_act)):
+            if p.deg() % 7 == 0:
+                deg_7_words[w] = p
+            if p.deg() % 5 == 0:
+                deg_5_words[w] = p
+
+        t_pairs = len(deg_7_words) * len(deg_5_words)
+        for w1, w2 in tqdm(product(deg_7_words, deg_5_words), total=t_pairs):
+            p1 = deg_7_words[w1]
+            p2 = deg_5_words[w2]
+
+            q = (p1 * p2) ** 2
+            if q.len() == 3:
+                self.add(w1 + w2 + w1 + w2)
+
+            q = (p2 * p1) ** 2
+            if q.len() == 3:
+                self.add(w2 + w1 + w2 + w1)
+
+        self.fill_unknown_triplets()
+
+    def fill_unknown_triplets(self):
+        addition_words = []
+        for tr, w in self.vocab.items():
+            a, b, c = tr
+            # (a b c)(a b c) = (a c b) | (a b c) (a c b) = (a) (b) (c) = e
+            sq = (a, c, b)
+            # По построению a - минимальный элемент в тройке (a b c) значит
+            # перестановка (a c b) правильная
+            if sq not in self.vocab:
+                addition_words.append(w + w)
+
+        for w in addition_words:
+            self.add(w)
+
+    def uncovered_triplets(self) -> Tuple[List[Tuple[int, int, int]], List[Tuple[int, int, int]]]:
+        vertex = []
+        for a, b, c in combinations(range(1, 8 + 1), 3):
+            if (a, b, c) not in self.vocab:
+                vertex.append((a, b, c))
+            if (a, c, b) not in self.vocab:
+                vertex.append((a, b, c))
+
+        edge = []
+        for a, b, c in combinations(range(9, 20 + 1), 3):
+            if (a, b, c) not in self.vocab:
+                edge.append((a, b, c))
+            if (a, c, b) not in self.vocab:
+                edge.append((a, b, c))
+
+        return vertex, edge
+
 
 if __name__ == '__main__':
 
-    # for w, p in tqdm(words_gen(5, 0), total=total_words_volume(5, 0)):
+    lexica_path = Path('lexica_3dim_230513')
+    # cl = Cycle3Lexica()
+    # cl.bruteforse()
+    # cl.save(lexica_path)
 
-    #     if p.len() == 0:
-    #         print(w, p)
-
-    #     # if p.deg() % 5 == 0:
-    #     #     print('5', w, p)
-    #     # if p.deg() % 7 == 0:
-    #     #     print('7', w, p)
-
-    dim = 3
-    where_to_save = Path('lexica_3dim')
-    cl = CycleLexica(dim)
-
-    for w1, p1 in tqdm(words_gen(5, 2), total=total_words_volume(5, 2)):
-        if p1.deg() % 7 != 0:
-            continue
-        for w2, p2 in words_gen(5, 2):
-            if p2.deg() % 5 != 0:
-                continue
-
-            p = p1 * p2
-            q = p ** 2
-
-            if q.len() == dim:
-                cl.add(w1 + w2 + w1 + w2)
-
-            p = p2 * p1
-            q = p ** 2
-            if q.len() == dim:
-                cl.add(w2 + w1 + w2 + w1)
-
-    cl.save(where_to_save)
+    cl = Cycle3Lexica.load(lexica_path)
+    v, e = cl.uncovered_triplets()
+    print(v, e)
