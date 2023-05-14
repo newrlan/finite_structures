@@ -34,7 +34,7 @@ def swaps_to_triplets(swaps_list: List[Swap]) -> List[Triplet]:
     порядка следования."""
 
     n = len(swaps_list)
-    assert len(swaps_list) % 2 != 0, "Only even permutations can be decompose on triplets."
+    assert len(swaps_list) % 2 == 0, f"Only even permutations {swaps_list} can be decompose on triplets."
     res = []
     for i in range(n // 2):
         a, b = swaps_list[2 * i]
@@ -93,7 +93,8 @@ class Puzzle(Rubik):
 
         p = self.permutation()
         postfix = ''
-        if len(p.swaps()) % 4 != 0:
+        vertex, _ = separate_swaps(p)
+        if len(vertex) % 2 != 0:
             p = p * ACT['O']
             postfix = 'OOO'
 

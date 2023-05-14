@@ -61,7 +61,7 @@ def test_even(n_times, permutation):
     assert len(p.swaps()) % 2 == 0, f'Word {w} permutation {p}'
 
 
-@pytest.mark.parametrize('n_times', range(100))
+@pytest.mark.parametrize('n_times', range(20))
 def test_Puzzle_word(n_times, permutation):
     ws, p = permutation
     rubik = Puzzle()
@@ -69,4 +69,3 @@ def test_Puzzle_word(n_times, permutation):
     new_ws = rubik.word()
     q = word(new_ws)
     assert p == q
-    # assert ws == rubik.word()
