@@ -2,3 +2,7 @@ __pycache__
 *.drawio
 *.DS_store
 src/rubik/state.txt
+*.aux
+*.log
+theory/*.pdf
+*.out

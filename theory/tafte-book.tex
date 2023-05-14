@@ -1,0 +1,26 @@
+% This is a modified version of the tufte-latex book example in which the title page and the contents page resemble Tufte's VDQI book, using Kevin Godby's code from this thread at https://groups.google.com/forum/#!topic/tufte-latex/ujdzrktC1BQ.
+%
+%% Unfortunately for the contents to contain
+%% the "Parts" lines successfully, hyperref
+%% needs to be disabled.
+\documentclass{tufte-book}
+% \usepackage[T2A]{fontenc} % Use 8-bit encoding that has 256 glyphs
+\usepackage[OT1]{fontenc} % Use 8-bit encoding that has 256 glyphs
+\usepackage[utf8]{inputenc} % Required for including letters with accents
+\usepackage[russian]{babel}
+% \usepackage{pscyr}
+%   \renewcommand{\rmdefault}{ftm}
+\title{Заметки по теории групп {\Huge на примере кубика Рубика}} % The article title
+
+\author{Садыков Нурлан}
+
+\begin{document}
+
+\frontmatter
+
+\maketitle  
+
+text-body
+основной текст
+
+\end{document}
