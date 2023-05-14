@@ -150,18 +150,22 @@ class Cycle3Lexica:
         self.fill_unknown_triplets()
 
     def fill_unknown_triplets(self):
-        addition_words = []
-        for tr, w in self.vocab.items():
-            a, b, c = tr
-            # (a b c)(a b c) = (a c b) | (a b c) (a c b) = (a) (b) (c) = e
-            sq = (a, c, b)
-            # По построению a - минимальный элемент в тройке (a b c) значит
-            # перестановка (a c b) правильная
-            if sq not in self.vocab:
-                addition_words.append(w + w)
+        """Посчитать все произведения 3-циклов и те, что дают новые 3-циклы
+        добавить в словарь."""
 
-        for w in addition_words:
-            self.add(w)
+        addition_words = []
+        for pair1, pair2 in product(self.vocab.items(), self.vocab.items()):
+            tr1, w1 = pair1
+            tr2, w2 = pair2
+
+            p1 = Permutation().apply_cycle(tr1)
+            p2 = Permutation().apply_cycle(tr2)
+            
+            q = p1 * p2
+            if q.len() == 3:
+                wq = w1 + w2
+                addition_words.append(wq)
+        self.add(*addition_words)
 
     def uncovered_triplets(self) -> Tuple[List[Tuple[int, int, int]], List[Tuple[int, int, int]]]:
         vertex = []
@@ -183,11 +187,14 @@ class Cycle3Lexica:
 
 if __name__ == '__main__':
 
-    lexica_path = Path('lexica_3dim_230513')
+    lexica_path = Path('lexica/3dim')
     # cl = Cycle3Lexica()
     # cl.bruteforse()
     # cl.save(lexica_path)
 
     cl = Cycle3Lexica.load(lexica_path)
+    cl.fill_unknown_triplets()
     v, e = cl.uncovered_triplets()
     print(v, e)
+
+    cl.save(Path('lexica/3dim_full'))
