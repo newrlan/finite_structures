@@ -107,3 +107,14 @@ class Puzzle(Rubik):
             res += ws
 
         return res + postfix
+
+    @classmethod
+    def load(cls, path: Path):
+        coloring = Rubik.load(path).coloring
+        return Puzzle(coloring)
+
+
+if __name__ == '__main__':
+    cube = Puzzle.load(Path('src/rubik/state.txt'))
+    lexica = Cycle3Lexica(Path('lexica/3dim_full'))
+    cube.word(lexica)
