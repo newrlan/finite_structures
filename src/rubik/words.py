@@ -79,7 +79,12 @@ class Cycle3Lexica:
         if path is not None:
             self = self.load(path)
 
-    def add(self, *word_list: str):
+    def add(self, *word_list: str, recover=False):
+        """ Добавить новое слово в лексику. Флаг recover указывает нужно ли
+        перезаписать (использовать новое к уже существующему триплету) слово
+        если оно уже есть в лексике. Если флаг выставлен в recover=False, то из
+        двух версий будет выбрана короткая. """
+
         for ws in word_list:
             p = word(ws)
             cycle = p.cycles()
@@ -87,7 +92,9 @@ class Cycle3Lexica:
             assert len(cycle[0]) == 3
 
             triplet = self._standart_triplet(cycle[0])
-            self.vocab[triplet] = ws
+            ws_mem = self.vocab.get(triplet, ws)
+            ws_res = ws if recover else min(ws_mem, ws)
+            self.vocab[triplet] = ws_res
 
     @staticmethod
     def _standart_triplet(tr: Tuple[int, int, int]) -> Tuple[int, int, int]:
@@ -160,7 +167,7 @@ class Cycle3Lexica:
 
             p1 = Permutation().apply_cycle(tr1)
             p2 = Permutation().apply_cycle(tr2)
-            
+
             q = p1 * p2
             if q.len() == 3:
                 wq = w1 + w2
@@ -195,6 +202,6 @@ if __name__ == '__main__':
     cl = Cycle3Lexica.load(lexica_path)
     cl.fill_unknown_triplets()
     v, e = cl.uncovered_triplets()
-    print(v, e)
+    print('uncovered', v, e)
 
-    cl.save(Path('lexica/3dim_full'))
+    # cl.save(Path('lexica/3dim_full'))
