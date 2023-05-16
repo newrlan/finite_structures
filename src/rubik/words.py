@@ -90,11 +90,20 @@ class Cycle3Lexica:
             cycle = p.cycles()
             assert len(cycle) == 1
             assert len(cycle[0]) == 3
-
             triplet = self._standart_triplet(cycle[0])
-            ws_mem = self.vocab.get(triplet, ws)
-            ws_res = ws if recover else min(ws_mem, ws)
-            self.vocab[triplet] = ws_res
+
+            if recover:
+                self.vocab[triplet] = ws
+                continue
+
+            # Процедура проверки, что новое слово для триплета короче имеющегося
+            if self.vocab.get(triplet) is not None:
+                continue
+
+            if len(self.vocab.get(triplet, ws)) <= len(ws):
+                continue
+
+            self.vocab[triplet] = ws
 
     @staticmethod
     def _standart_triplet(tr: Tuple[int, int, int]) -> Tuple[int, int, int]:
@@ -194,14 +203,17 @@ class Cycle3Lexica:
 
 if __name__ == '__main__':
 
-    lexica_path = Path('lexica/3dim')
+    # lexica_path = Path('lexica/3dim')
     # cl = Cycle3Lexica()
     # cl.bruteforse()
     # cl.save(lexica_path)
 
-    cl = Cycle3Lexica.load(lexica_path)
+    cl = Cycle3Lexica.load(Path('lexica/3dim'))
+    print(cl.vocab[(9, 20, 16)])
     cl.fill_unknown_triplets()
     v, e = cl.uncovered_triplets()
     print('uncovered', v, e)
+    print(cl.vocab[(9, 20, 16)])
+    # print(cl.vocab)
 
     # cl.save(Path('lexica/3dim_full'))

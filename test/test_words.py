@@ -93,3 +93,20 @@ def test_Cycle3Lexica_save_load(tmp_path):
 def test_Cycle3Lexica__standart_triplet(triplet, answer):
     s_tr = Cycle3Lexica()._standart_triplet(triplet)
     assert s_tr == answer
+
+
+def test_Cycle3Lexica_add():
+    # Arrange
+    cl = Cycle3Lexica()
+    w1 = 'BWYBWRWGWOBWYBWRWGWO'
+    w2 = 'GWBBBRBYBOGWBBBRBYBO'
+    cl.add(w1)
+    cl.add(w2)
+
+    # Act
+    cl.add(w1 * 4)
+    cl.add(w2 * 2)
+
+    # Assert
+    assert len(cl.vocab) == 3
+    assert cl.get((13, 14, 17)) == w1
