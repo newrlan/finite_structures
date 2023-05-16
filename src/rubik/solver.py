@@ -142,6 +142,3 @@ if __name__ == '__main__':
     lexica = Cycle3Lexica.load(Path('lexica/3dim_full'))
     ws = cube.word(lexica)
     cube.instruction(lexica)
-    # a, i = cube.solution(lexica)
-    # print(a, i)
-    # print(ws[:-i])
