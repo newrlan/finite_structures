@@ -92,12 +92,13 @@ class Cycle3Lexica:
             assert len(cycle[0]) == 3
             triplet = self._standart_triplet(cycle[0])
 
-            if recover:
+            if self.vocab.get(triplet) is None:
                 self.vocab[triplet] = ws
                 continue
 
             # Процедура проверки, что новое слово для триплета короче имеющегося
-            if self.vocab.get(triplet) is not None:
+            if recover:
+                self.vocab[triplet] = ws
                 continue
 
             if len(self.vocab.get(triplet, ws)) <= len(ws):
@@ -203,17 +204,6 @@ class Cycle3Lexica:
 
 if __name__ == '__main__':
 
-    # lexica_path = Path('lexica/3dim')
-    # cl = Cycle3Lexica()
-    # cl.bruteforse()
-    # cl.save(lexica_path)
-
-    cl = Cycle3Lexica.load(Path('lexica/3dim'))
-    print(cl.vocab[(9, 20, 16)])
-    cl.fill_unknown_triplets()
+    cl = Cycle3Lexica.load(Path('lexica/3dim_full'))
     v, e = cl.uncovered_triplets()
     print('uncovered', v, e)
-    print(cl.vocab[(9, 20, 16)])
-    # print(cl.vocab)
-
-    # cl.save(Path('lexica/3dim_full'))
