@@ -89,7 +89,7 @@ class Puzzle(Rubik):
         """ Показать слово которое кодирует перестановку на стейте кубика. """
         # TODO: сделать путь чтения лексики универсальным
         if lexica is None:
-            lexica = Cycle3Lexica.load(Path('lexica/3dim'))
+            lexica = Cycle3Lexica.load(Path('lexica/3dim_full'))
 
         p = self.permutation()
         postfix = ''
@@ -113,8 +113,35 @@ class Puzzle(Rubik):
         coloring = Rubik.load(path).coloring
         return Puzzle(coloring)
 
+    def instruction(self, lexica: Optional[Cycle3Lexica] = None):
+        ws = self.word(lexica)
+        print(f"Found word:\n\t{ws}")
+
+        def take_last_action(ws):
+            act = ws[-1]
+            i = 1
+            while i < len(ws) and ws[-i - 1] == act:
+                i += 1
+            return act, i
+
+        step = 1
+        while len(ws) > 0:
+            a, i = take_last_action(ws)
+            print(f'step: {step}', (4-i) * a)
+            ws = ws[:-i]
+            step += 1
+            input()
+
+        print("Done!")
+
+        return None
+
 
 if __name__ == '__main__':
     cube = Puzzle.load(Path('src/rubik/state.txt'))
-    lexica = Cycle3Lexica(Path('lexica/3dim_full'))
-    cube.word(lexica)
+    lexica = Cycle3Lexica.load(Path('lexica/3dim_full'))
+    ws = cube.word(lexica)
+    cube.instruction(lexica)
+    # a, i = cube.solution(lexica)
+    # print(a, i)
+    # print(ws[:-i])
