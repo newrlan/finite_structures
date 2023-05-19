@@ -75,7 +75,7 @@ class InvoluteRepresentation(Representation):
         c = square[1][1]    # цвет центральной точки квадрата
         assert c.upper() in Color.__members__, f"Undefined color {c.upper()}."
         res = dict()
-        line = sum(square, [])
+        line = sum([list(x) for x in square], [])
         for i, col in enumerate(line):
             assert col.upper() in Color.__members__, f"Undefined color {col.upper()}"
             res[f'{c}{i+1}'] = col
@@ -91,12 +91,12 @@ class InvoluteRepresentation(Representation):
         # В первой строке лежат координаты векторов Ox, Oy, Oz (положительные направления)
         squares = []
         for i in range(6):
-            squares.append(coloring[i+1:i+4])
+            squares.append(coloring[3 * i + 1:3 * i + 4])
 
         add_msg = " Please, check orientation."
-        assert squares[0][1][1].lower() == coloring[0][2].lower, error_msg + add_msg
-        assert squares[1][1][1].lower() == coloring[0][0].lower, error_msg + add_msg
-        assert squares[3][1][1].lower() == coloring[0][1].lower, error_msg + add_msg
+        assert squares[0][1][1].lower() == coloring[0][2].lower(), error_msg + add_msg
+        assert squares[1][1][1].lower() == coloring[0][0].lower(), error_msg + add_msg
+        assert squares[3][1][1].lower() == coloring[0][1].lower(), error_msg + add_msg
 
         # В следующих переменных содержатся оппозиционные цвета. Первый цвет в
         # паре, цвет положительного направления, второй - отрицательного.
@@ -127,18 +127,6 @@ class InvoluteRepresentation(Representation):
         }
         val = self.state[key]
         return colored('栗', color[val])
-
-    def _show_face(self, k: str) -> List[str]:
-        if k not in self.colors:
-            raise ValueError(f'Key {k} must be in list {self.colors}')
-
-        res = []
-        for j in range(3):
-            line = ''.join([self._show_label(f'{k}{i+3*j}') for i in [1, 2, 3]])
-            res.append(line)
-
-        return res
-        # return '\n'.join(res)
 
     def show(self):
         """ Показать раскраску на развертке куба.
@@ -195,27 +183,13 @@ class InvoluteRepresentation(Representation):
         print('\n'.join(res))
         return None
 
-        
-
-
-
-        
-
-    # def show_square(self, color: Color):
-    # def show_square(self):
-    #     # square = self._take_square(color)
-    #     # square.insert(color.name, 4)
-    #     square = [['O', 'O', 'Y'],['O', 'O', 'Y'],['O', 'O', 'Y']]
-    #     txt = ''
-    #     for x in 
-    #     txt = colored('栗', 'red') + colored('栗', 'green') + colored('栗', 'white') + \
-    #             ' ' + colored('栗', 'red') + colored('栗', 'green') + colored('栗', 'white') 
-    #     print(' ' + txt, '\n', txt, '\n', txt)
-
-
     @classmethod
     def load(cls, path: Path):
-        pass
+        with open(path, 'r') as f:
+            coloring = [line.replace('\n', '') for line in f if line != '\n']
+            self = cls()
+            self.prepare(coloring)
+            return self
 
     def permutation(self):
         pass
@@ -234,5 +208,5 @@ class InvoluteRepresentation(Representation):
 
 
 if __name__ == '__main__':
-    cl = InvoluteRepresentation()
+    cl = InvoluteRepresentation.load(Path('src/rubik/state_inv.txt'))
     cl.show()
