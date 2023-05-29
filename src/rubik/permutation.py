@@ -8,9 +8,14 @@ class Permutation:
     def __init__(self, perm: Optional[dict[int, int]] = None):
         if perm is not None and not self._is_correct(perm):
             raise ValueError("Map in dictionary isn't permutation.")
-        self._perm = perm if perm is not None else dict()
+        self._perm = dict()
+        if perm is not None:
+            for key, val in perm.items():
+                if key != val:
+                    self._perm[key] = val
 
     def apply(self, k):
+        """ Показать куда перейдет элемент k под действием перестановки. """
         return self._perm.get(k, k)
 
     def _from_cycle(self, cycle: List[int]):

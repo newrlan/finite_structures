@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import List, Optional
 from termcolor import colored
 
-from rubik.coloring import Color
+from rubik.coloring import Color, Vector
 from rubik.permutation import Permutation
 
 
@@ -62,8 +62,36 @@ class InvoluteRepresentation(Representation):
     """
 
     colors = [col.name.upper() for col in Color]
-    codes = [f'{c}{n}' for n in range(1, 9 + 1) 
+    codes = [f'{c}{n}' for n in range(1, 9 + 1)
              for c in [col.name.upper() for col in Color]]
+
+    _vertex = [
+        # Upper face
+        ('B3', 'O9', 'Y3'),
+        ('W9', 'B1', 'O7'),
+        ('G9', 'W3', 'O1'),
+        ('O3', 'Y9', 'G3'),
+        # Down face
+        ('B9', 'R3', 'Y1'),
+        ('W7', 'R1', 'B7'),
+        ('G7', 'W1', 'R7'),
+        ('R9', 'G1', 'Y7'),
+    ]
+
+    _edges = [
+        ('G2', 'Y8'),
+        ('G6', 'O2'),
+        ('G4', 'R8'),
+        ('G8', 'W2'),
+        ('W4', 'R4'),
+        ('W6', 'O4'),
+        ('B8', 'R2'),
+        ('B2', 'O8'),
+        ('W8', 'B4'),
+        ('B6', 'Y2'),
+        ('Y4', 'R6'),
+        ('Y6', 'O6'),
+    ]
 
     def __init__(self, path: Optional[Path] = None):
 
@@ -108,12 +136,12 @@ class InvoluteRepresentation(Representation):
         state = dict()
         for sqr in squares:
             state = {**state, **self._square_prepare(sqr)}
-        self.state = state
 
-    def _take_square(self, color: Color):
-        square = {key: value for key, value in self.state.items()
-                  if key[0] == color.name}
-        return square
+        # self.state = state
+        # self.show()
+
+        state = self._index_state(state)
+        self.state = state
 
     def _show_label(self, key):
         color = {
@@ -125,7 +153,7 @@ class InvoluteRepresentation(Representation):
             'O': 'yellow'
             # 'O': 'grey'
         }
-        val = self.state[key]
+        val = self.state[key][0]
         return colored('栗', color[val])
 
     def show(self):
@@ -194,19 +222,67 @@ class InvoluteRepresentation(Representation):
     def permutation(self):
         pass
 
-    # @classmethod
-    # def load(cls, path: Path) -> Rubik:
-    #     """ Загрузить состояние из файла. """
-    #     coloring: ColoringCell = dict()
-    #     with open(path, 'r') as f:
-    #         for line in f:
-    #             x, y, z, color = line.split()
-    #             cell_a = Vector(int(x), int(y), int(z))
-    #             cell_b = cell(color)
-    #             coloring[cell_a] = cell_b
-    #     return Rubik(coloring)
+    @classmethod
+    def _vertex_state_permutation(cls, state: dict[str, str]) -> Permutation:
+
+        def name(xs):
+            abs = [x[0] for x in xs]
+            abs.sort()
+            return ''.join(abs)
+
+        tr_names = {name(tr): i for i, tr in enumerate(cls._vertex)}
+
+        perm_dict = dict()
+        for tr in cls._vertex:
+            who = tr_names[name([state.get(x, x) for x in tr])]
+            where = tr_names[name(tr)]
+            perm_dict[who] = where
+
+        return Permutation(perm_dict)
+
+    @classmethod
+    def _edges_state_permutation(cls, state: dict[str, str]) -> Permutation:
+        
+        def name(xs):
+            abs = [x[0] for x in xs]
+            abs.sort()
+            return ''.join(abs)
+
+        tr_names = {name(tr): i for i, tr in enumerate(cls._edges)}
+
+        perm_dict = dict()
+        for tr in cls._edges:
+            who = tr_names[name([state.get(x, x) for x in tr])]
+            where = tr_names[name(tr)]
+            perm_dict[who] = where
+
+        return Permutation(perm_dict)
+
+    def _index_state(self, state: dict[str, str]) -> dict[str, str]:
+        new_state = {f'{c}5': f'{c}5' for c in self.colors}
+        pv = self._vertex_state_permutation(state)
+        for i, tr in enumerate(self._vertex):
+            j = pv.apply(i)
+            image = {c[0]: c for c in self._vertex[j]}
+            for c in tr:
+                color = state[c]
+                new_state[c] = image[color]
+
+        pv = self._edges_state_permutation(state)
+        for i, tr in enumerate(self._edges):
+            j = pv.apply(i)
+            image = {c[0]: c for c in self._edges[j]}
+            for c in tr:
+                color = state[c]
+                new_state[c] = image[color]
+
+        return new_state
+        
 
 
 if __name__ == '__main__':
     cl = InvoluteRepresentation.load(Path('src/rubik/state_inv.txt'))
     cl.show()
+    print(cl.state)
+
+    # print(cl._index_state(cl.state))
