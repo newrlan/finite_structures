@@ -216,12 +216,9 @@ class InvoluteRepresentation(Representation):
             return self
 
     def permutation(self):
-        indexis = {key: i for i, key in enumerate(self.codes)}
         perm = dict()
         for key, val in self.state.items():
-            i = indexis[key]
-            j = indexis[val]
-            perm[j] = i
+            perm[val] = key
 
         return Permutation(perm)
 
@@ -287,8 +284,3 @@ if __name__ == '__main__':
     cl.show()
     print(cl.state)
     print(cl.permutation())
-    cycles = cl.permutation().cycles()
-    for cyc in cycles:
-        line = ' '.join([cl.codes[i] for i in cyc])
-        print(line)
-

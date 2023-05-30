@@ -1,11 +1,11 @@
 from math import lcm
-from typing import List, Optional, Tuple
-from copy import deepcopy
-from itertools import combinations
+from typing import List, Optional, Union
+
+PermDictType = Union[dict[int, int], dict[str, str]]
 
 
 class Permutation:
-    def __init__(self, perm: Optional[dict[int, int]] = None):
+    def __init__(self, perm: Optional[PermDictType] = None):
         if perm is not None and not self._is_correct(perm):
             raise ValueError("Map in dictionary isn't permutation.")
         self._perm = dict()
@@ -22,12 +22,11 @@ class Permutation:
         pass
 
     def __mul__(self, perm):
-        m_2 = 0 if len(perm._perm) == 0 else max(perm._perm)
-        m_1 = 0 if len(self._perm) == 0 else max(self._perm)
-        n = max(m_2, m_1)
-        res = dict()
+        m_1 = set(self._perm.keys())
+        m_2 = set(perm._perm.keys())
 
-        for k in range(n+1):
+        res = dict()
+        for k in m_1 | m_2:
             k_ = self.apply(k)
             k__ = perm.apply(k_)
             if k != k__:
@@ -36,7 +35,7 @@ class Permutation:
         return Permutation(res)
 
     @staticmethod
-    def _is_correct(arr: dict[int, int]) -> bool:
+    def _is_correct(arr: PermDictType) -> bool:
         """ Проверка корректности задания перестановки через словарь. """
 
         key_list = list(arr.keys())
@@ -44,7 +43,13 @@ class Permutation:
             return False
 
         val_list = list(arr.values())
-        return len(val_list) == len(set(val_list))
+        if len(val_list) != len(set(val_list)):
+            return False
+
+        for x in val_list:
+            if arr.get(x) is None:
+                return False
+        return True
 
     def cycles(self):
         """ Циклы перестановки. """

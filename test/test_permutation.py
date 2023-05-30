@@ -23,6 +23,42 @@ def test_permutation_mul():
     assert len(pq._perm) == 3
 
 
+def test_permutation___eq__():
+    p = Permutation({1: 2, 2: 1})
+    q = Permutation({1: 2, 2: 1, 3: 4, 4: 5, 5: 3})
+    s = Permutation({3: 4, 4: 5, 5: 3})
+
+    assert p != q
+    assert p != s
+    assert q != s
+    assert q == p * s
+
+
+def test_permutation_apply_cycle():
+    q = Permutation().apply_cycle(['R4', 'R8', 'G5', 'F1', 'C4'])
+
+    perm_dict = {'R4': 'R8', 'R8': 'G5', 'G5': 'F1', 'F1': 'C4', 'C4': 'R4'}
+    p = Permutation(perm_dict)
+    assert p == q
+
+
+def test_permutation___repr__():
+    p = Permutation().apply_cycle(['R4', 'G8', 'F5'], ['O1', 'Y2'])
+    line = str(p)
+    assert line == '(R4 G8 F5) (O1 Y2)' or \
+        line == '(G8 F5 R4) (O1 Y2)' or \
+        line == '(F5 R4 G8) (O1 Y2)' or \
+        line == '(R4 G8 F5) (Y2 O1)' or \
+        line == '(G8 F5 R4) (Y2 O1)' or \
+        line == '(F5 R4 G8) (Y2 O1)' or \
+        line == '(O1 Y2) (R4 G8 F5)' or \
+        line == '(O1 Y2) (G8 F5 R4)' or \
+        line == '(O1 Y2) (F5 R4 G8)' or \
+        line == '(Y2 O1) (R4 G8 F5)' or \
+        line == '(Y2 O1) (G8 F5 R4)' or \
+        line == '(Y2 O1) (F5 R4 G8)'
+
+
 def test_permutation_cycle():
 
     p = Permutation()
