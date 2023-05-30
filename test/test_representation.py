@@ -1,4 +1,5 @@
 import pytest
+from rubik.permutation import Permutation
 from rubik.representations import InvoluteRepresentation
 
 
@@ -63,5 +64,20 @@ def test_InvoluteRepresentation__edges_permutation():
             }
 
     perm = InvoluteRepresentation._edges_state_permutation(state)
-    print(perm)
     assert perm.len() == 2
+
+
+def test_InvoluteRepresentation_permutation(state):
+    rubik = InvoluteRepresentation.load(state)
+    p = rubik.permutation()
+    q = Permutation()\
+        .apply_cycle([0, 38, 52])\
+        .apply_cycle([2, 51, 16])\
+        .apply_cycle([4, 39, 41])\
+        .apply_cycle([12, 50, 13])\
+        .apply_cycle([14, 49, 15])\
+        .apply_cycle([19, 35])\
+        .apply_cycle([20, 34])\
+        .apply_cycle([31, 32])
+
+    assert p == q

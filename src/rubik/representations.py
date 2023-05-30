@@ -93,9 +93,8 @@ class InvoluteRepresentation(Representation):
         ('Y6', 'O6'),
     ]
 
-    def __init__(self, path: Optional[Path] = None):
-
-        self.state = {key: key[0] for key in self.codes}
+    def __init__(self):
+        self.state = {key: key for key in self.codes}
 
     @staticmethod
     def _square_prepare(square: List[List[str]]) -> dict[str, str]:
@@ -136,9 +135,6 @@ class InvoluteRepresentation(Representation):
         state = dict()
         for sqr in squares:
             state = {**state, **self._square_prepare(sqr)}
-
-        # self.state = state
-        # self.show()
 
         state = self._index_state(state)
         self.state = state
@@ -220,7 +216,14 @@ class InvoluteRepresentation(Representation):
             return self
 
     def permutation(self):
-        pass
+        indexis = {key: i for i, key in enumerate(self.codes)}
+        perm = dict()
+        for key, val in self.state.items():
+            i = indexis[key]
+            j = indexis[val]
+            perm[j] = i
+
+        return Permutation(perm)
 
     @classmethod
     def _vertex_state_permutation(cls, state: dict[str, str]) -> Permutation:
@@ -277,12 +280,15 @@ class InvoluteRepresentation(Representation):
                 new_state[c] = image[color]
 
         return new_state
-        
 
 
 if __name__ == '__main__':
     cl = InvoluteRepresentation.load(Path('src/rubik/state_inv.txt'))
     cl.show()
     print(cl.state)
+    print(cl.permutation())
+    cycles = cl.permutation().cycles()
+    for cyc in cycles:
+        line = ' '.join([cl.codes[i] for i in cyc])
+        print(line)
 
-    # print(cl._index_state(cl.state))
