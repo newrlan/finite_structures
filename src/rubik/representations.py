@@ -239,7 +239,7 @@ class InvoluteRepresentation(Representation):
             assert name in obj_dict, f"For obj {tr} coloring has not valid case {name}."
             local_vertex_coloring = obj_dict[name]
             for x in tr:
-                coloring[x] = local_vertex_coloring[x[0]]
+                coloring[x] = local_vertex_coloring[pre_coloring[x]]
 
         for c in cls.colors:
             center = c + '5'
@@ -308,7 +308,7 @@ if __name__ == '__main__':
 
     cl = InvoluteRepresentation.load(Path('src/rubik/state_inv.txt'))
     cl.show()
-    print(cl.state)
+    # print(cl.state)
     # print(cl.permutation())
 
     # print(cl.state2tab())
