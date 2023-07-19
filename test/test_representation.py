@@ -1,4 +1,6 @@
+from pathlib import Path
 import pytest
+import os
 from rubik.permutation import Permutation
 from rubik.representations import InvoluteRepresentation
 
@@ -81,3 +83,16 @@ def test_InvoluteRepresentation_permutation(state):
         .apply_cycle([31, 32])
 
     assert p == q
+
+
+@pytest.mark.parametrize('action', ['B', 'BW'])
+def test_InvoluteRepresentation_action(action):
+
+    path = Path(os.path.dirname(__file__))
+
+    file_name = f'state_action_{action}.txt'
+    state1 = InvoluteRepresentation.load(path / file_name)
+    state0 = InvoluteRepresentation.load(path / 'state_init.txt')
+
+    state0.apply(action)
+    assert state0.state == state1.state

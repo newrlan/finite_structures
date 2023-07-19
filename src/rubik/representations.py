@@ -93,6 +93,39 @@ class InvoluteRepresentation(Representation):
         ('Y6', 'O6'),
     ]
 
+    _actions = {
+        "O": Permutation().apply_cycle(('O1', 'O3', 'O9', 'O7'),
+                                       ('O2', 'O6', 'O8', 'O4'),
+                                       ('B3', 'W9', 'G9', 'Y9'),
+                                       ('B2', 'W6', 'G6', 'Y6'),
+                                       ('B1', 'W3', 'G3', 'Y3')),
+        "B": Permutation().apply_cycle(('B1', 'B3', 'B9', 'B7'),
+                                       ('B2', 'B6', 'B8', 'B4'),
+                                       ('O7', 'Y3', 'R3', 'W7'),
+                                       ('O8', 'Y2', 'R2', 'W8'),
+                                       ('O9', 'Y1', 'R1', 'W9')),
+        "R": Permutation().apply_cycle(('R1', 'R3', 'R9', 'R7'),
+                                       ('R2', 'R6', 'R8', 'R4'),
+                                       ('B9', 'Y7', 'G7', 'W7'),
+                                       ('B8', 'Y4', 'G4', 'W4'),
+                                       ('B7', 'Y1', 'G1', 'W1')),
+        "Y": Permutation().apply_cycle(('Y1', 'Y3', 'Y9', 'Y7'),
+                                       ('Y2', 'Y6', 'Y8', 'Y4'),
+                                       ('O9', 'G3', 'R9', 'B9'),
+                                       ('O6', 'G2', 'R6', 'B6'),
+                                       ('O3', 'G1', 'R3', 'B3')),
+        "W": Permutation().apply_cycle(('W1', 'W3', 'W9', 'W7'),
+                                       ('W2', 'W6', 'W8', 'W4'),
+                                       ('O1', 'B1', 'R1', 'G7'),
+                                       ('O4', 'B4', 'R4', 'G8'),
+                                       ('O7', 'B7', 'R7', 'G9')),
+        "G": Permutation().apply_cycle(('G1', 'G3', 'G9', 'G7'),
+                                       ('G2', 'G6', 'G8', 'G4'),
+                                       ('O1', 'W1', 'R7', 'Y9'),
+                                       ('O2', 'W2', 'R8', 'Y8'),
+                                       ('O3', 'W3', 'R9', 'Y7'))
+    }
+
     def __init__(self):
         self.state = {key: key for key in self.codes}
 
@@ -261,6 +294,7 @@ class InvoluteRepresentation(Representation):
     def _index_state(self, state: dict[str, str]) -> dict[str, str]:
         new_state = {f'{c}5': f'{c}5' for c in self.colors}
         pv = self._vertex_state_permutation(state)
+        print(pv, state)
         for i, tr in enumerate(self._vertex):
             j = pv.apply(i)
             image = {c[0]: c for c in self._vertex[j]}
@@ -278,9 +312,54 @@ class InvoluteRepresentation(Representation):
 
         return new_state
 
+    def apply(self, word: str):
+
+        p = self.permutation()
+        for w in word:
+            q = self._actions.get(w.upper())
+            p *= q
+
+        for key in self.state:
+            self.state[key] = p.apply(key)
+
+    def state2tab(self) -> List[str]:
+        """ Перевести состояние кубика в плоский формат в котором происходит
+        чтение из файла."""
+
+        tab = []
+        for color in "OBRYGW":
+            for index_line in [range(i, i+3) for i in range(1, 9, 3)]:
+                line = []
+                for i in index_line:
+                    key = color + str(i)
+                    val_color = self.state.get(key, key)[0]
+                    line.append(val_color)
+
+                tab.append(' '.join(line))
+
+        return tab
+
+
+
 
 if __name__ == '__main__':
+    from time import sleep
+
+    # cl = InvoluteRepresentation()
     cl = InvoluteRepresentation.load(Path('src/rubik/state_inv.txt'))
     cl.show()
     print(cl.state)
     print(cl.permutation())
+
+    print(cl.state2tab())
+    for line in cl.state2tab():
+        print(line)
+
+    # for i in range(5):
+    #     print(f"step {i}")
+    #     # cl.apply('B')
+    #     # cl.show()
+    #     cl.apply('W')
+    #     cl.show()
+    #     print(cl.permutation())
+    #     sleep(0.5)
