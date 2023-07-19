@@ -140,14 +140,6 @@ class InvoluteRepresentation(Representation):
 
         return res
 
-    @classmethod
-    def _get_vertex_index(cls, triplet: List[str]) -> dict[str, str]:
-        
-        triplet.sort()
-        for tr in cls._vertex:
-            pass
-        
-
     def __init__(self):
         self.state = {key: key for key in self.standart_coloring(False)}
 
@@ -275,13 +267,17 @@ class InvoluteRepresentation(Representation):
 
     def apply(self, word: str):
 
-        p = self.permutation()
+        perm = self.permutation()
         for w in word:
             q = self._actions.get(w.upper())
-            p *= q
+            perm *= q
 
-        for key in self.state:
-            self.state[key] = p.apply(key)
+        new_coloring = dict()
+        for val in self.standart_coloring(group=False):
+            key = perm.apply(val)
+            new_coloring[key] = val
+
+        self.state = new_coloring
 
     def state2tab(self) -> List[str]:
         """ Перевести состояние кубика в плоский формат в котором происходит
