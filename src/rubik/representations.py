@@ -61,9 +61,8 @@ class InvoluteRepresentation(Representation):
     Note: Пустые строки в файле будут игнорироваться.
     """
 
-    colors = [col.name.upper() for col in Color]
-    codes = [f'{c}{n}' for n in range(1, 9 + 1)
-             for c in [col.name.upper() for col in Color]]
+    # colors = [col.name.upper() for col in Color]
+    colors = ['O', 'B', 'R', 'Y', 'G', 'W']
 
     _vertex = [
         # Upper face
@@ -126,51 +125,31 @@ class InvoluteRepresentation(Representation):
                                        ('O3', 'W3', 'R9', 'Y7'))
     }
 
-    def __init__(self):
-        self.state = {key: key for key in self.codes}
+    @classmethod
+    def standart_coloring(cls, group=True):
+        """ Создать стандартную раскраску в сгруппированном виде тройками или
+        простым списком."""
 
-    @staticmethod
-    def _square_prepare(square: List[List[str]]) -> dict[str, str]:
-        """ Прочитать раскраску квадрата. """
-        c = square[1][1]    # цвет центральной точки квадрата
-        assert c.upper() in Color.__members__, f"Undefined color {c.upper()}."
-        res = dict()
-        line = sum([list(x) for x in square], [])
-        for i, col in enumerate(line):
-            assert col.upper() in Color.__members__, f"Undefined color {col.upper()}"
-            res[f'{c}{i+1}'] = col
+        res = []
+        for c in cls.colors:
+            for i in range(1, 9 + 1):
+                res.append(c + str(i))
+
+        if group:
+            return [res[i:i+3] for i in range(0, len(res), 3)]
 
         return res
 
-    def prepare(self, coloring):
-        """ Переводит раскраску к удобному виду. """
+    @classmethod
+    def _get_vertex_index(cls, triplet: List[str]) -> dict[str, str]:
+        
+        triplet.sort()
+        for tr in cls._vertex:
+            pass
+        
 
-        error_msg = "Incorrect coloring representation."
-        assert len(coloring) == 19, error_msg
-
-        # В первой строке лежат координаты векторов Ox, Oy, Oz (положительные направления)
-        squares = []
-        for i in range(6):
-            squares.append(coloring[3 * i + 1:3 * i + 4])
-
-        add_msg = " Please, check orientation."
-        assert squares[0][1][1].lower() == coloring[0][2].lower(), error_msg + add_msg
-        assert squares[1][1][1].lower() == coloring[0][0].lower(), error_msg + add_msg
-        assert squares[3][1][1].lower() == coloring[0][1].lower(), error_msg + add_msg
-
-        # В следующих переменных содержатся оппозиционные цвета. Первый цвет в
-        # паре, цвет положительного направления, второй - отрицательного.
-
-        self._color_Ox = (coloring[0][0], squares[1][1][1])
-        self._color_Oy = (coloring[0][1], squares[5][1][1])
-        self._color_Oz = (coloring[0][2], squares[2][1][1])
-
-        state = dict()
-        for sqr in squares:
-            state = {**state, **self._square_prepare(sqr)}
-
-        state = self._index_state(state)
-        self.state = state
+    def __init__(self):
+        self.state = {key: key for key in self.standart_coloring(False)}
 
     def _show_label(self, key):
         color = {
@@ -241,12 +220,51 @@ class InvoluteRepresentation(Representation):
         return None
 
     @classmethod
+    def _set_color_index(cls, pre_coloring: dict[str, str]) -> dict[str, str]:
+        """ Восстановить индексы вершин и ребер в предварительной раскраске. """
+
+        obj_list = cls._vertex + cls._edges
+        coloring = dict()
+        obj_dict = dict()
+        for tr in obj_list:
+            name = [x[0] for x in tr]
+            name.sort()
+            name = tuple(name)
+            obj_dict[name] = {x[0]: x for x in tr}
+
+        for tr in obj_list:
+            name = [pre_coloring[x] for x in tr]
+            name.sort()
+            name = tuple(name)
+            assert name in obj_dict, f"For obj {tr} coloring has not valid case {name}."
+            local_vertex_coloring = obj_dict[name]
+            for x in tr:
+                coloring[x] = local_vertex_coloring[x[0]]
+
+        for c in cls.colors:
+            center = c + '5'
+            coloring[center] = center
+
+        return coloring
+
+    @classmethod
     def load(cls, path: Path):
+        """ Прочитать раскраску из файла. """
+
         with open(path, 'r') as f:
-            coloring = [line.replace('\n', '') for line in f if line != '\n']
-            self = cls()
-            self.prepare(coloring)
-            return self
+            lines = [line.replace('\n', '') for line in f if line != '\n']
+            lines = lines[1:]
+
+        pre_coloring = {}
+        assert len(lines) == 18, f"Some problem with amount of lines in {path}."
+        for coord, color in zip(cls.standart_coloring(), lines):
+            assert len(coord) == len(color), f"There is mistake line in {path}."
+            for x, y in zip(coord, color):
+                pre_coloring[x] = y
+
+        self = cls()
+        self.state = cls._set_color_index(pre_coloring)
+        return self
 
     def permutation(self):
         perm = dict()
@@ -254,63 +272,6 @@ class InvoluteRepresentation(Representation):
             perm[val] = key
 
         return Permutation(perm)
-
-    @classmethod
-    def _vertex_state_permutation(cls, state: dict[str, str]) -> Permutation:
-
-        def name(xs):
-            abs = [x[0] for x in xs]
-            abs.sort()
-            return ''.join(abs)
-
-        tr_names = {name(tr): i for i, tr in enumerate(cls._vertex)}
-
-        perm_dict = dict()
-        for tr in cls._vertex:
-            who = tr_names[name([state.get(x, x) for x in tr])]
-            where = tr_names[name(tr)]
-            perm_dict[who] = where
-
-        return Permutation(perm_dict)
-
-    @classmethod
-    def _edges_state_permutation(cls, state: dict[str, str]) -> Permutation:
-        
-        def name(xs):
-            abs = [x[0] for x in xs]
-            abs.sort()
-            return ''.join(abs)
-
-        tr_names = {name(tr): i for i, tr in enumerate(cls._edges)}
-
-        perm_dict = dict()
-        for tr in cls._edges:
-            who = tr_names[name([state.get(x, x) for x in tr])]
-            where = tr_names[name(tr)]
-            perm_dict[who] = where
-
-        return Permutation(perm_dict)
-
-    def _index_state(self, state: dict[str, str]) -> dict[str, str]:
-        new_state = {f'{c}5': f'{c}5' for c in self.colors}
-        pv = self._vertex_state_permutation(state)
-        print(pv, state)
-        for i, tr in enumerate(self._vertex):
-            j = pv.apply(i)
-            image = {c[0]: c for c in self._vertex[j]}
-            for c in tr:
-                color = state[c]
-                new_state[c] = image[color]
-
-        pv = self._edges_state_permutation(state)
-        for i, tr in enumerate(self._edges):
-            j = pv.apply(i)
-            image = {c[0]: c for c in self._edges[j]}
-            for c in tr:
-                color = state[c]
-                new_state[c] = image[color]
-
-        return new_state
 
     def apply(self, word: str):
 
@@ -345,15 +306,14 @@ class InvoluteRepresentation(Representation):
 if __name__ == '__main__':
     from time import sleep
 
-    # cl = InvoluteRepresentation()
     cl = InvoluteRepresentation.load(Path('src/rubik/state_inv.txt'))
     cl.show()
     print(cl.state)
-    print(cl.permutation())
+    # print(cl.permutation())
 
-    print(cl.state2tab())
-    for line in cl.state2tab():
-        print(line)
+    # print(cl.state2tab())
+    # for line in cl.state2tab():
+    #     print(line)
 
     # for i in range(5):
     #     print(f"step {i}")
