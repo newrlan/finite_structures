@@ -1,16 +1,80 @@
-% This is a modified version of the tufte-latex book example in which the title page and the contents page resemble Tufte's VDQI book, using Kevin Godby's code from this thread at https://groups.google.com/forum/#!topic/tufte-latex/ujdzrktC1BQ.
-%
-%% Unfortunately for the contents to contain
-%% the "Parts" lines successfully, hyperref
-%% needs to be disabled.
-\documentclass{tufte-book}
-% \usepackage[T2A]{fontenc} % Use 8-bit encoding that has 256 glyphs
-\usepackage[OT1]{fontenc} % Use 8-bit encoding that has 256 glyphs
+\documentclass[a4paper, oneside]{book}
+
+\usepackage{amsmath, systeme, amsfonts}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+% -- Настройка боковых заметок ------------------------------------------------
+\usepackage[a4paper, marginparwidth=6cm, marginparsep=0.8cm]{geometry}
+\geometry{left=1.5cm}
+\geometry{right=8cm}
+
+\setlength{\marginparpush}{15pt}
+
+
+\usepackage[T2A]{fontenc} % Use 8-bit encoding that has 256 glyphs
 \usepackage[utf8]{inputenc} % Required for including letters with accents
 \usepackage[russian]{babel}
-% \usepackage{pscyr}
-%   \renewcommand{\rmdefault}{ftm}
 \usepackage{graphicx}
+
+% marginnote создает НЕ нумерованные плавающие боковые заметки
+\usepackage{marginnote}
+
+% Здесь делаем маленький шрифт для marginnote
+\let\oldmarginpar\marginpar
+\renewcommand\marginpar[1]{\-\oldmarginpar[\raggedleft\footnotesize #1]%
+{\raggedright\footnotesize #1}}
+
+% sidenotes создает НУМЕРОВАННЫЕ плавающие боковые заметки и боковые картинки
+\usepackage{sidenotes}
+% Здесь делаем маленький шрифт для sidenotes
+\makeatletter
+\RenewDocumentCommand\sidenotetext{ o o +m }{%      
+    \IfNoValueOrEmptyTF{#1}{%
+        \@sidenotes@placemarginal{#2}{\textsuperscript{\thesidenote}{}~\footnotesize#3}%
+        \refstepcounter{sidenote}%
+    }{%
+        \@sidenotes@placemarginal{#2}{\textsuperscript{#1}~#3}%
+    }%
+}
+\makeatother
+% -----------------------------------------------------------------------------
+
+% -- Настройка библиографии ---------------------------------------------------
+\usepackage[backend=biber]{biblatex}
+\addbibresource{biblio.bib}
+% -----------------------------------------------------------------------------
+
+% % -- Настройка форматирование глав и секций -----------------------------------
+% \usepackage{titlesec}
+% 
+% \titleformat
+% {\chapter} % command
+% [display] % shape
+% {\bfseries\Large\itshape} % format
+% {Story No. \ \thechapter} % label
+% {0.5ex} % sep
+% {
+%     \rule{\textwidth}{1pt}
+%     \vspace{1ex}
+%     \centering
+% } % before-code
+% [
+% \vspace{-0.5ex}%
+% \rule{\textwidth}{0.3pt}
+% ] % after-code
+% 
+% 
+% \titleformat{\section}[wrap]
+% {\normalfont\bfseries}
+% {\thesection.}{0.5em}{}
+% 
+% \titlespacing{\section}{12pc}{1.5ex plus .1ex minus .2ex}{1pc}
+% % -----------------------------------------------------------------------------
+
+\usepackage[breaklinks,hidelinks]{hyperref}
+
 
 \title{Конечные структуры \\ {\Huge в примерах}} % The article title
 
@@ -36,7 +100,7 @@
 \end{marginfigure}
 
 
-Обозначим вращения граней кубика\sidenote[][1\baselineskip]{
+Обозначим вращения граней кубика\marginpar{
     Под вращением грани понимаем ее поворот на $90^\circ$ по часовой стрелке
     относительно остальной части кубика.
 } в соответствии с
@@ -47,7 +111,7 @@ $y$-желтый, $w$-белый, $g$-зеленый. Вращения гран�
 образующими свободной группы. Любое слово в этой группе можно применить как
 инструкцию к кубику рубика. Будем считать слово тривиальным, если после его
 применения к собранному кубику, мы снова получим собранный
-кубик.\sidenote[][1\baselineskip]{Любые промежуточные состояния применения слова к кубику не
+кубик.\marginpar{Любые промежуточные состояния применения слова к кубику не
 обязаны давать собранный вариант.} Например, очевидно, что $b^4 = bbbb = e$ то
 есть вращение относительно синей грани четыре раза --- тривиальное слово,
 поскольку снова дает правильную сборку.
@@ -60,7 +124,7 @@ $90^\circ$, потом синюю и только потом желтую.
 Каждое действие переставляет стикеры на кубике Рубика, значит группа действий
 на кубике может быть описана как подгруппа группы перестановок. Чтобы явно
 определить перестановку по какому-либо состоянию нужно ввести
-кодировку.\sidenote[][1\baselineskip]{\emph{Пример неполной кодировки.} Если цветам приписать
+кодировку.\marginpar{\emph{Пример неполной кодировки.} Если цветам приписать
     такие векторы $o=(0,\,0,\,1)$, $b=(1,\,0,\,0)$, $y=(0,\,1,\,0)$,
     $w=(0,\,-1,0)$, $g=(-1,\,0,\,0)$, $r=(0,\,0,\,-1)$, то можно определить
     начальную координату каждого маленького кубика в кубике Рубика как сумму
@@ -81,7 +145,7 @@ $90^\circ$, потом синюю и только потом желтую.
 
 \begin{marginfigure}
     \includegraphics[width=1.1\columnwidth]{../pics/rubik_prepresentation.pdf}
-    \caption{Движение желтой грани $y$}
+    \caption{Разрез кубика на две ленты с нумерациями.}
     \label{fig:representation}
     %\setfloatalignment{b}
 \end{marginfigure}
