@@ -302,20 +302,9 @@ class InvoluteRepresentation(Representation):
 if __name__ == '__main__':
     from time import sleep
 
-    cl = InvoluteRepresentation.load(Path('src/rubik/state_inv.txt'))
-    cl.show()
-    # print(cl.state)
-    # print(cl.permutation())
+    cl = InvoluteRepresentation.load(Path('test/state_action_BOW.txt'))
 
-    # print(cl.state2tab())
-    # for line in cl.state2tab():
-    #     print(line)
-
-    # for i in range(5):
-    #     print(f"step {i}")
-    #     # cl.apply('B')
-    #     # cl.show()
-    #     cl.apply('W')
-    #     cl.show()
-    #     print(cl.permutation())
-    #     sleep(0.5)
+    for act in cl._actions:
+        st = InvoluteRepresentation()
+        st.apply(act)
+        st.show()

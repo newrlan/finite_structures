@@ -17,82 +17,149 @@ from rubik.representations import InvoluteRepresentation
 
 
 @pytest.fixture()
-def state(tmp_path):
+def db_states(tmp_path):
 
-    lines = [
-        "BYO",
-        "WOG",
-        "WOY",
-        "BOB",
-        "WBY",
-        "BBB",
-        "BBB",
-        "RRR",
-        "RRY",
-        "GRR",
-        "YYO",
-        "RYO",
-        "YYO",
-        "GGY",
-        "GGG",
-        "WGO",
-        "RWG",
-        "WWO",
-        "WWO",
-    ]
+    action_state = {
+        '': [
+                "BYO",
+                "OYW",
+                "GOR",
+                "YGG",
+                "GOR",
+                "RBO",
+                "WBW",
+                "BWB",
+                "WRY",
+                "YBY",
+                "OWW",
+                "OYY",
+                "RBO",
+                "BYG",
+                "RGG",
+                "BOY",
+                "OBG",
+                "RWW",
+                "RGR",
+            ],
 
-    file_name = tmp_path / 'state'
-    with open(file_name, 'w') as f:
-        f.write('\n'.join(lines))
+        'b': [
+                "BYO",
+                "OYW",
+                "GOR",
+                "RGR",
+                "WRG",
+                "BBO",
+                "WOR",
+                "OWW",
+                "WRY",
+                "YBY",
+                "GGY",
+                "OYY",
+                "RBO",
+                "BYG",
+                "RGG",
+                "BOY",
+                "OBG",
+                "RWW",
+                "BWB",
+            ],
 
-    return file_name
+        'bo': [
+                "BYO",
+                "RGO",
+                "GOY",
+                "RRW",
+                "YYO",
+                "BBO",
+                "WOR",
+                "OWW",
+                "WRY",
+                "YBY",
+                "GGG",
+                "OYG",
+                "RBY",
+                "BYG",
+                "RGW",
+                "BOB",
+                "OBW",
+                "RWR",
+                "BWG",
+            ],
+
+        'bow': [
+                    "BYO",
+                    "BGO",
+                    "OOY",
+                    "BRW",
+                    "RYO",
+                    "GBO",
+                    "ROR",
+                    "YWW",
+                    "BRY",
+                    "WBY",
+                    "GGG",
+                    "OYG",
+                    "RBY",
+                    "BYG",
+                    "RGW",
+                    "OWY",
+                    "BRO",
+                    "WWB",
+                    "GRW",
+                ],
+    }
+
+    for key in action_state:
+        file_name = tmp_path / f'state_{key}.txt'
+        with open(file_name, 'w') as f:
+            f.write('\n'.join(action_state[key]))
+
+    return tmp_path
 
 
-# def test_InvoluteRepresentation__vertex_permutation():
-#     state = {'B3': 'O9', 'O9': 'Y3', 'Y3': 'B3',
-#              'G9': 'B9', 'W3': 'R3', 'O1': 'Y1',
-#              'B9': 'G9', 'R3': 'W3', 'Y1': 'O1',
-#             }
+
+@pytest.mark.parametrize('word', ['b', 'bo', 'bow'])
+def test_InvoluteRepresentation_permutation(word, db_states):
+
+    st0 = InvoluteRepresentation.load(db_states / 'state_.txt')
+    p = st0.permutation()
+
+    ans = Permutation()
+    for c in word:
+        ans = ans * st0._actions.get(c.upper())
+
+    st1 = InvoluteRepresentation.load(db_states / f'state_{word}.txt')
+    q = st1.permutation()
+    print(p**-1 * q)
+    print(ans)
+
+    assert p**-1 * q == ans
+
+
+@pytest.mark.parametrize('word', ['b', 'bo', 'bow'])
+def test_InvoluteRepresentation_apply(word, db_states):
+
+    st0 = InvoluteRepresentation.load(db_states / 'state_.txt')
+    st0.apply(word)
+    p = st0.permutation()
+
+    st1 = InvoluteRepresentation.load(db_states / f'state_{word}.txt')
+    q = st1.permutation()
+    assert p == q
+
+    
+
+
+
+
+# @pytest.mark.parametrize('action', ['B', 'BW'])
+# def test_InvoluteRepresentation_action(action):
 # 
-#     perm = InvoluteRepresentation._vertex_state_permutation(state)
-#     assert perm.len() == 2
-#     assert perm.apply(2) == 4
-
-
-# def test_InvoluteRepresentation__edges_permutation():
-#     state = {'G4': 'R8', 'R8': 'G4',
-#              'R4': 'R6', 'W4': 'Y4',
-#              'R6': 'R4', 'Y4': 'W4',
-#             }
+#     path = Path(os.path.dirname(__file__))
 # 
-#     perm = InvoluteRepresentation._edges_state_permutation(state)
-#     assert perm.len() == 2
-
-
-# def test_InvoluteRepresentation_permutation(state):
-#     rubik = InvoluteRepresentation.load(state)
-#     p = rubik.permutation()
-#     q = Permutation()\
-#         .apply_cycle([0, 38, 52])\
-#         .apply_cycle([2, 51, 16])\
-#         .apply_cycle([4, 39, 41])\
-#         .apply_cycle([12, 50, 13])\
-#         .apply_cycle([14, 49, 15])\
-#         .apply_cycle([19, 35])\
-#         .apply_cycle([20, 34])\
-#         .apply_cycle([31, 32])
+#     file_name = f'state_action_{action}.txt'
+#     state1 = InvoluteRepresentation.load(path / file_name)
+#     state0 = InvoluteRepresentation.load(path / 'state_init.txt')
 # 
-#     assert p == q
-
-
-@pytest.mark.parametrize('action', ['B', 'BW'])
-def test_InvoluteRepresentation_action(action):
-
-    path = Path(os.path.dirname(__file__))
-
-    file_name = f'state_action_{action}.txt'
-    state1 = InvoluteRepresentation.load(path / file_name)
-    state0 = InvoluteRepresentation.load(path / 'state_init.txt')
-
-    state0.apply(action)
-    assert state0.state == state1.state
+#     state0.apply(action)
+#     assert state0.state == state1.state
