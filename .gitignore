@@ -6,3 +6,5 @@ src/**/*.txt
 *.log
 theory/*.pdf
 *.out
+*.bcf
+*.xml
