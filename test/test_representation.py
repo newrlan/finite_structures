@@ -5,17 +5,6 @@ from rubik.permutation import Permutation
 from rubik.representations import InvoluteRepresentation
 
 
-# def test_InvoluteRepresentation__square_read():
-#     square = ["WRR", "WWR", "BRG"]
-#     square = [list(x) for x in square]
-#     res = InvoluteRepresentation()._square_prepare(square)
-#     assert res['W1'] == 'W'
-#     assert res['W7'] == 'B'
-#     assert res['W4'] == 'W'
-#     assert res['W5'] == 'W'
-#     assert res['W9'] == 'G'
-
-
 @pytest.fixture()
 def db_states(tmp_path):
 
@@ -107,6 +96,87 @@ def db_states(tmp_path):
                     "WWB",
                     "GRW",
                 ],
+        'bowr': [
+                    "BYO",
+
+                    "BGO",
+                    "OOY",
+                    "BRW",
+
+                    "RYO",
+                    "GBO",
+                    "BWG",
+
+                    "WBY",
+                    "BRW",
+                    "YYW",
+
+                    "RGG",
+                    "OYG",
+                    "RBY",
+
+                    "GYG",
+                    "OGW",
+                    "RWY",
+
+                    "BRO",
+                    "RWB",
+                    "ORW",
+                ],
+        'bowrg': [
+                    "BYO",
+
+                    "YBR",
+                    "OOY",
+                    "BRW",
+
+                    "RYO",
+                    "GBO",
+                    "BWG",
+
+                    "WBY",
+                    "BRW",
+                    "ORB",
+
+                    "RGG",
+                    "OYG",
+                    "YYW",
+
+                    "ROG",
+                    "WGY",
+                    "YWG",
+
+                    "BGO",
+                    "RWB",
+                    "ORW",
+                ],
+        'bowrgy': [
+                    "BYO",
+
+                    "YBO",
+                    "OOO",
+                    "BRG",
+
+                    "RYY",
+                    "GBW",
+                    "BWB",
+
+                    "WBR",
+                    "BRO",
+                    "ORG",
+
+                    "YOR",
+                    "YYG",
+                    "WGG",
+
+                    "RYW",
+                    "WGY",
+                    "YWG",
+
+                    "BGO",
+                    "RWB",
+                    "ORW",
+                ],
     }
 
     for key in action_state:
@@ -115,7 +185,6 @@ def db_states(tmp_path):
             f.write('\n'.join(action_state[key]))
 
     return tmp_path
-
 
 
 @pytest.mark.parametrize('word', ['b', 'bo', 'bow'])
@@ -130,8 +199,6 @@ def test_InvoluteRepresentation_permutation(word, db_states):
 
     st1 = InvoluteRepresentation.load(db_states / f'state_{word}.txt')
     q = st1.permutation()
-    print(p**-1 * q)
-    print(ans)
 
     assert p**-1 * q == ans
 
@@ -147,19 +214,41 @@ def test_InvoluteRepresentation_apply(word, db_states):
     q = st1.permutation()
     assert p == q
 
-    
+
+@pytest.mark.parametrize('left, right', [
+            ('', 'b'),
+            ('b', 'bo'),
+            ('bo', 'bow'),
+            ('bow', 'bowr'),
+            ('bowr', 'bowrg'),
+            ('bowrg', 'bowrgy'),
+         ]
+    )
+def test_InvoluteRepresentation_actions(left, right, db_states):
+
+    # arrange
+    l = InvoluteRepresentation.load(db_states / f'state_{left}.txt')
+    r = InvoluteRepresentation.load(db_states / f'state_{right}.txt')
+
+    # act
+    act = right[-1].upper()
+    l.apply(act)
+
+    # assert
+    assert l.permutation() == r.permutation()
 
 
-
-
-# @pytest.mark.parametrize('action', ['B', 'BW'])
-# def test_InvoluteRepresentation_action(action):
-# 
-#     path = Path(os.path.dirname(__file__))
-# 
-#     file_name = f'state_action_{action}.txt'
-#     state1 = InvoluteRepresentation.load(path / file_name)
-#     state0 = InvoluteRepresentation.load(path / 'state_init.txt')
-# 
-#     state0.apply(action)
-#     assert state0.state == state1.state
+@pytest.mark.parametrize('act, ans', [
+            ('o', Permutation().apply_cycle(['OY', 'BO', 'OW', 'GO'],
+                                            ['BOW', 'GOW', 'GOY', 'BOY'])
+             ),
+            ('b', Permutation().apply_cycle(['BY', 'BR', 'BW', 'BO'],
+                                            ['BOW', 'BOY', 'BRY', 'BRW'])
+             ),
+         ]
+    )
+def test_InvoluteRepresentation_permutation_full_false(act, ans):
+    cl = InvoluteRepresentation()
+    cl.apply(act)
+    p = cl.permutation(False)
+    assert p == ans

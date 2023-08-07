@@ -120,9 +120,9 @@ class InvoluteRepresentation(Representation):
                                        ('O7', 'B7', 'R7', 'G9')),
         "G": Permutation().apply_cycle(('G1', 'G3', 'G9', 'G7'),
                                        ('G2', 'G6', 'G8', 'G4'),
-                                       ('O1', 'W1', 'R7', 'Y9'),
+                                       ('O1', 'W1', 'R9', 'Y9'),
                                        ('O2', 'W2', 'R8', 'Y8'),
-                                       ('O3', 'W3', 'R9', 'Y7'))
+                                       ('O3', 'W3', 'R7', 'Y7'))
     }
 
     @classmethod
@@ -258,7 +258,10 @@ class InvoluteRepresentation(Representation):
         self.state = cls._set_color_index(pre_coloring)
         return self
 
-    def permutation(self):
+    def permutation(self, full=True) -> Permutation:
+        if not full:
+            return self._vertex_permutation()
+
         perm = dict()
         for key, val in self.state.items():
             perm[val] = key
@@ -296,15 +299,53 @@ class InvoluteRepresentation(Representation):
 
         return tab
 
+    def _vertex_permutation(self) -> Permutation:
+        """ Вычислить перестановку в кодировке на 20 точках (вершинная)."""
 
+        perm = dict()
+        for tr in self._vertex + self._edges:
+            key = [x[0] for x in tr]
+            key.sort()
+            key = ''.join(key)
+
+            val = [self.state[x][0] for x in tr]
+            val.sort()
+            val = ''.join(val)
+            # print(val, key)
+
+            perm[val] = key
+
+        # print(perm)
+
+        return Permutation(perm)
 
 
 if __name__ == '__main__':
     from time import sleep
 
-    cl = InvoluteRepresentation.load(Path('test/state_action_BOW.txt'))
+    # for act in cl._actions:
+    #     st = InvoluteRepresentation()
+    #     st.apply(act)
+    #     st.show()
 
-    for act in cl._actions:
-        st = InvoluteRepresentation()
-        st.apply(act)
-        st.show()
+    with open('lexica/3dim_full', 'r') as f:
+        words = [l.replace('\n', '') for l in f]
+
+    for w in words:
+        cl = InvoluteRepresentation()
+        cl.apply(w)
+        p1 = cl.permutation(False)
+        cl.apply(w)
+        p2 = cl.permutation(False)
+        cl.apply(w)
+        p3 = cl.permutation(False)
+
+        if p3 != Permutation():
+            print(w, p1, p2, p3)
+
+
+    # for i in range(90):
+    #     cl = InvoluteRepresentation()
+    #     cl.apply('bow' * i)
+    #     p = cl.permutation()
+    #     print(i, p, p.deg())
