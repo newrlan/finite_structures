@@ -322,30 +322,16 @@ class InvoluteRepresentation(Representation):
 
 if __name__ == '__main__':
     from time import sleep
+    from tqdm import tqdm
 
-    # for act in cl._actions:
-    #     st = InvoluteRepresentation()
-    #     st.apply(act)
-    #     st.show()
-
-    with open('lexica/3dim_full', 'r') as f:
+    with open('lexica/full_triplet_words.txt', 'r') as f:
         words = [l.replace('\n', '') for l in f]
 
-    for w in words:
+    for w in tqdm(words):
         cl = InvoluteRepresentation()
         cl.apply(w)
         p1 = cl.permutation(False)
-        cl.apply(w)
-        p2 = cl.permutation(False)
-        cl.apply(w)
-        p3 = cl.permutation(False)
+        q1 = cl.permutation()
 
-        if p3 != Permutation():
-            print(w, p1, p2, p3)
-
-
-    # for i in range(90):
-    #     cl = InvoluteRepresentation()
-    #     cl.apply('bow' * i)
-    #     p = cl.permutation()
-    #     print(i, p, p.deg())
+        print(w)
+        print('\t', p1, '|', q1)
