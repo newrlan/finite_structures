@@ -78,6 +78,7 @@ class Cycle3Lexica:
         self.vocab: dict[Tuple[int, int, int], str] = dict()
         if path is not None:
             self = self.load(path)
+        self.full_vocab = list()
 
     def add(self, *word_list: str, recover=False):
         """ Добавить новое слово в лексику. Флаг recover указывает нужно ли
@@ -138,7 +139,7 @@ class Cycle3Lexica:
         with open(path, 'w') as f:
             f.write('\n'.join(words_list))
 
-    def bruteforse(self):
+    def bruteforse(self, log_file=None):
         deg = 5
         uniq_act = 2
         gen = words_gen(deg, uniq_act)
@@ -151,6 +152,8 @@ class Cycle3Lexica:
             if p.deg() % 5 == 0:
                 deg_5_words[w] = p
 
+        log = []
+
         t_pairs = len(deg_7_words) * len(deg_5_words)
         for w1, w2 in tqdm(product(deg_7_words, deg_5_words), total=t_pairs):
             p1 = deg_7_words[w1]
@@ -158,13 +161,24 @@ class Cycle3Lexica:
 
             q = (p1 * p2) ** 2
             if q.len() == 3:
-                self.add(w1 + w2 + w1 + w2)
+                ws = w1 + w2 + w1 + w2
+                log.append(ws)
+                self.add(ws)
 
             q = (p2 * p1) ** 2
             if q.len() == 3:
-                self.add(w2 + w1 + w2 + w1)
+                ws = w2 + w1 + w2 + w1
+                log.append(ws)
+                self.add(ws)
 
-        self.fill_unknown_triplets()
+        addition_words = self.fill_unknown_triplets()
+        log += addition_words
+
+        if log_file:
+            print("Start write log to file.")
+            with open(log_file, 'w') as f:
+                line = '\n'.join(log)
+                f.write(line)
 
     def fill_unknown_triplets(self):
         """Посчитать все произведения 3-циклов и те, что дают новые 3-циклы
@@ -183,6 +197,7 @@ class Cycle3Lexica:
                 wq = w1 + w2
                 addition_words.append(wq)
         self.add(*addition_words)
+        return addition_words
 
     def uncovered_triplets(self) -> Tuple[List[Tuple[int, int, int]], List[Tuple[int, int, int]]]:
         vertex = []
@@ -204,6 +219,5 @@ class Cycle3Lexica:
 
 if __name__ == '__main__':
 
-    cl = Cycle3Lexica.load(Path('lexica/3dim_full'))
-    v, e = cl.uncovered_triplets()
-    print('uncovered', v, e)
+    cl = Cycle3Lexica()
+    cl.bruteforse('full_triplet_words.txt')
