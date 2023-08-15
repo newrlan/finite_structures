@@ -219,5 +219,43 @@ class Cycle3Lexica:
 
 if __name__ == '__main__':
 
-    cl = Cycle3Lexica()
-    cl.bruteforse('full_triplet_words.txt')
+    # cl = Cycle3Lexica()
+    # cl.bruteforse('full_triplet_words.txt')
+
+    lexica = 'full_triplet_words.txt'
+    # with open('lexica/full_triplet_words.txt', 'r') as f:
+    with open('words_l_12.txt', 'r') as f:
+        lexica = f.read().split('\n')
+
+    from rubik.representations import InvoluteRepresentation
+
+    i = 0
+    for word in lexica:
+        rubik = InvoluteRepresentation()
+        word = word[:6]
+        rubik.apply(word)
+        p = rubik.permutation()
+        q = rubik.permutation(False)
+
+        # if len(q.cycles()[0][0]) != 3:
+        #     continue
+
+        # crit = [len(c) <= 3 for c in p.cycles()]
+        # if not all(crit):
+        #     continue
+
+        p3 = p ** 3
+        p2 = p ** 2
+
+        # if p3.deg() != 3:
+        #     continue
+
+        print(i, word, q, p2, p2.deg())
+        i += 1
+
+
+    # rubik = InvoluteRepresentation()
+    # rubik.apply('oywgbrowygbr')
+    # p = rubik.permutation()
+    # q = rubik.permutation(False)
+    # print(word, q, p, p.deg())
